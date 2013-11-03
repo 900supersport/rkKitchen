@@ -60,8 +60,8 @@ def query_add_by_file(filepath,deployfilename):
     '''iterate through deployfile adding lines to filepath for any cases where the key is not present
     '''
     try:
-        logging.info('kitchen_utils::query_add_by_File filepath ' + filepath)
-        logging.info('kitchen_utils::query_add_by_File deployfilename ' + deployfilename)
+        logging.info('kitchen_utils::query_add_by_File filepath' + filepath)
+        logging.info('kitchen_utils::query_add_by_File filepath' + deployfilename)
         kRar=os.path.join(KitchenConfig.KitchenConfig.KitchenPath, 'kitchenRunasroot.py')
         path = os.path.expanduser(deployfilename)
         with open(path,'r') as f:

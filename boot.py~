@@ -144,37 +144,35 @@ def finalise_boot():
         logerror('boot::finalise_boot ' ,e,1)
     
     
-#def initrc_mount_system_rw(openforreview):    
-#    '''update init.rc to mount system rw'''
-#    try:
-#        sedpath = os.path.join(KitchenConfig.KitchenConfig.KitchenPath, 'processcontrol/init.rc_systemrw')
-#        apply_sed('sedpath
-#            ,'working/boot/init.rc'
-#            ,openforreview)
-#    except Exception as e:
-#        logerror('boot::initrc_mount_system_rw ',e,1)
+def initrc_mount_system_rw(openforreview):    
+    '''update init.rc to mount system rw'''
+    try:
+        apply_sed('~/pykitchen/processcontrol/init.rc_systemrw'
+            ,'working/boot/init.rc'
+            ,openforreview)
+    except Exception as e:
+        logerror('boot::initrc_mount_system_rw ',e,1)
                
    
-#def addinitd_support(openforreview):
-#    '''query add init.d support'''
-#    try:
-#        path = 'working/boot/init.rc'
-#        spath = os.path.expanduser('~/pykitchen/processcontrol/addinitdsupport')
-#        with open(spath,'r') as sf:
-#            query_add(path, 'service runparts', sf.read())
+def addinitd_support(openforreview):
+    '''query add init.d support'''
+    try:
+        path = 'working/boot/init.rc'
+        spath = os.path.expanduser('~/pykitchen/processcontrol/addinitdsupport')
+        with open(spath,'r') as sf:
+            query_add(path, 'service runparts', sf.read())
 
                     
-#        if openforreview ==1:            
-#            os.system('sudo gedit ' + path)
-#    except Exception as e:
-#        logerror('boot::addinitd_support ' ,e,1)  
+        if openforreview ==1:            
+            os.system('sudo gedit ' + path)
+    except Exception as e:
+        logerror('boot::addinitd_support ' ,e,1)  
 
         
 def brand_boot(openforreview):
     '''brad boot.img'''
     try:
-        spath = os.path.join(KitchenConfig.KitchenConfig.KitchenPath, 'processcontrol/bootdeploy')
-        deployfiles(spath
+        deployfiles('~/pykitchen/processcontrol/bootdeploy'
             ,'working/boot/'
             ,openforreview)
     except Exception as e:

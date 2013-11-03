@@ -116,7 +116,7 @@ def extendBuildprop(edit):
     
     try:    
         path = 'working/mntsystem/build.prop'
-        qabfile = os.path.join(KitchenConfig.KitchenConfig.KitchenPath,'processcontrol/queryaddbuild.prop')
+        qabfile = os.path.join(KitchenConfig.KitchenConfig.KitchenPath,'/processcontrol/queryaddbuild.prop')
         
         logging.info('system::extendBuildprop KitchenConfig.KitchenConfig.KitchenPath ' + KitchenConfig.KitchenConfig.KitchenPath)
         logging.info('system::extendBuildprop path ' + path)

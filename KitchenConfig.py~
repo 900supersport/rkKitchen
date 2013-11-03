@@ -59,7 +59,7 @@ class KitchenConfig:
         try:
             KitchenConfig.KitchenPath = os.path.dirname( os.path.abspath(__file__))
             KitchenConfig.KitchenConfigFile = os.path.join(KitchenConfig.KitchenPath,'Kitchen.config')
-            logging.info('KitchenConfig.KitchenPath ' + KitchenConfig.KitchenPath)
+            logging.info(KitchenConfig.KitchenPath)
             
             #test here to prevent reentry 
             if KitchenConfig.initialised == 0:
