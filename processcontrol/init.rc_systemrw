@@ -1,0 +1,10 @@
+#init.rc edits to mount system rw
+
+#these will be made into called like
+#sudo sed -i "s/\(data 077\)[0123456]\( system system\)/\17\2/g" boot/init.rc
+
+#"s/\(data 077\)[0123456]\( system system\)/\17\2/g"
+#"s/\(mount .* \/system wait \)ro/\1rw/g"
+#"s/\(mount rootfs rootfs \/ \)ro/\1rw/g"
+"s/\(chmod 077\)[0123456]\( \/data\)/\17\2/g"
+"s/\(on property:ro.debuggable=\)10/\11/g"

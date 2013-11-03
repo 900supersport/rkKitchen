@@ -1,0 +1,12 @@
+#this file controls boot deploy process
+#
+#lines starting # and empty will be treated as comments
+#
+#each line is of the form 
+#   type,deploypathname, deploydestination, filepermissions
+#
+#   type is one of G,L
+#       G Global, universal for all ROMs
+#       L Local, ROM specific deployment
+
+L, initlogo.rle, , 0o664

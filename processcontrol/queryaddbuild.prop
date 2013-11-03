@@ -1,0 +1,13 @@
+#this file controls extension of init.rc
+#
+#lines staring # and empty will be treated as comments
+#
+#each line is of the form 
+#   check, addition
+#
+#   check, a string to check for
+#   addition, the line to add
+
+#test
+Feck, #Feck = Father Jack says, that would be an ecumenical matter
+

@@ -1,0 +1,126 @@
+#this file controls debloat process
+#
+#lines staring # and empty will be treated as comments
+#
+#each line is of the form 
+#   bloatpathname, removaldestination
+#
+#bloatpathname is rooted to system
+app/buyu.apk, removed/app
+app/cube.0.3.0_v2963.apk, removed/app
+app/Music.apk, removed/app
+app/Calculator.apk, removed/app
+app/CCCCACDE.apk, removed/app
+app/com.chaozh.iReaderFree_145459.apk, removed/app
+app/cube.apk, removed/app
+app/cube.0.3.1_v3313.apk, removed/app
+app/hd.apk, removed/app
+app/Music.apk, removed/app
+app/PinyinIME.apk, removed/app
+app/qq_hd_1.7.0.apk, removed/app
+#app/RKUpdateService.apk, removed/app
+app/uc.apk, removed/app
+app/asus.apk, removed/app
+app/com.sg.android.fish-1.apk, removed/app
+app/com.tencent.hd.qq-2.apk, removed/app
+app/cube.0.3.1_v3025.apk, removed/app
+app/RKEBookReader.apk, removed/app
+app/RenrenHD.apk, removed/app
+app/ucbrowser2.0.3.210.apk, removed/app
+app/UCBrowser2.0.3.210.apk, removed/app
+
+
+app/AnZhi20130116.apk, removed/app
+app/com.cube.gfan_1032_cube_3965_0.9.7_v3965.apk, removed/app
+app/CUBE_Pad_GUIDE_V1.08_20130415.apk, removed/app
+app/FishingJoy.apk, removed/app
+app/iReader.apk, removed/app
+app/PearlXuanyuan.apk, removed/app
+app/TaoBao_20130308-1.6_3.4.2.apk, removed/app
+app/tmall_android_release_2.0.2_700414_5869.apk, removed/app
+app/UCBrowser_V2.2.2.259.apk, removed/app
+app/SohuTV2.8.apk, removed/app
+
+
+#these are to be replaces so archive
+media/bootanimation.zip, removed/media
+media/bootanimation_0.zip, removed/media
+media/bootanimation_1.zip, removed/media
+etc/permissions/tablet_core_hardware.xml, removed/etc/permissions
+etc/permissions/com.android.location.provider.xml, removed/etc/permissions
+etc/permissions/android.hardware.location.xml, removed/etc/permissions
+etc/permissions/android.hardware.location.gps.xml, removed/etc/permissions
+#===============
+#ApplicationsProvider.apk
+#BackupRestoreConfirmation.apk
+#BooksProvider.apk
+#Browser.apk
+#Calendar.apk
+#CalendarProvider.apk
+#CertInstaller.apk
+#Chrome.apk
+#ChromeBookmarksSyncAdapter.apk
+#DefaultContainerService.apk
+#DeskClock.apk
+#DownloadProvider.apk
+#DownloadProviderUi.apk
+#DrmProvider.apk
+#Email.apk
+#Exchange2.apk
+#FaceLock.apk
+#Galaxy4.apk
+#Gallery2.apk
+#Gmail.apk
+#GmsCore.apk
+#GoogleBackupTransport.apk
+#GoogleCalendarSyncAdapter.apk
+#GoogleContactsSyncAdapter.apk
+#GoogleEars.apk
+#GoogleFeedback.apk
+#GoogleLoginService.apk
+#GooglePartnerSetup.apk
+#GoogleServicesFramework.apk
+#GoogleTTS.apk
+#HTMLViewer.apk
+#HoloSpiralWallpaper.apk
+#InputDevices.apk
+#KeyChain.apk
+#LatinIME.apk
+#Launcher2.apk
+#LiveWallpapers.apk
+#LiveWallpapersPicker.apk
+#MagicSmokeWallpapers.apk
+#MediaFloat.apk
+#MediaProvider.apk
+#MediaUploader.apk
+#MusicFX.apk
+#NetworkLocation.apk
+#NoiseField.apk
+#OneTimeInitializer.apk
+#PackageInstaller.apk
+#PhaseBeam.apk
+#Phone.apk
+#Phonesky.apk
+#PicoTts.apk
+#Provision.apk
+#QuickSearchBox.apk
+#RkApkinstaller.apk
+#RkExplorer.apk
+#RkVideoPlayer.apk
+#Settings.apk
+#SettingsProvider.apk
+#SharedStorageBackup.apk
+#SoundRecorder.apk
+#Superuser.apk
+#SystemUI.apk
+#TelephonyProvider.apk
+#UserDictionaryProvider.apk
+#Velvet.apk
+#VideoEditor.apk
+#VisualizationWallpapers.apk
+#VoiceSearchStub.apk
+#VpnDialogs.apk
+#WAPPushManager.apk
+#asus.apk
+#com.google.android.marvin.talkback.apk
+#flashplayer

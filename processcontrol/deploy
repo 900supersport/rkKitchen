@@ -1,0 +1,28 @@
+#this file controls system deploy process
+#
+#lines staring # and empty will be treated as comments
+#
+#each line is of the form 
+#   type,deploypathname, deploydestination, filepermissions
+#
+#   type is one of G,L
+#       G Global, universal for all ROMs
+#       L Local, ROM specific deployment
+
+#G, Superuser.apk, app/, 0o644
+G, com.koushikdutta.superuser-1.apk, app/, 0o644
+G, su, xbin/, 0o6755
+#G, su, bin/, 0o6755
+G, busybox, bin/, 0o755
+G, tablet_core_hardware.xml, etc/permissions/, 0o644
+G, com.android.location.provider.xml, etc/permissions/, 0o644
+G, android.hardware.location.xml, etc/permissions/, 0o644
+G, android.hardware.location.gps.xml, etc/permissions/, 0o644
+
+G, AppInjector_v1.3.0.apk, app/, 0o644
+G, FileSystemManager_v0.3.0.apk, app/, 0o644
+G, Reboot_v0.9.3.apk, app/, 0o644
+
+L, bootanimation.zip, media/, 0o755
+
+

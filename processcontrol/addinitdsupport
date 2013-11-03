@@ -1,0 +1,7 @@
+#900supersport  add init.d support to boot/init.rc
+service runparts /system/bin/run-parts /system/etc/init.d
+    class core
+    user root
+    group root
+    oneshot
+

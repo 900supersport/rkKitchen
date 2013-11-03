@@ -1,0 +1,10 @@
+#build.prop edits to make english
+
+#these will be made into called like
+#sudo sed -i "s/\(data 077\)[0123456]\( system system\)/\17\2/g" boot/init.rc
+
+"s/\(ro.product.locale.language=\).*/\1en/g" 
+"s/\(ro.product.locale.region=\).*/\1GB/g" 
+"s/\(ro.com.android.dateformat=\).*/\1dd-MM-yyyy/g" 
+"s/\(persist.sys.timezone=\).*/\1Europe\/London/g" 
+"s/\(ro.rk.homepage_base=\).*/\1http:\/\/www.google.co.uk/g" 
