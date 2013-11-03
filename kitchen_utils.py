@@ -26,6 +26,7 @@ import logging
 import shutil
 import glob
 import time
+import struct
 
 #900supersport imports
 import KitchenConfig
@@ -296,17 +297,10 @@ def unpackboot_recovery(image):
             os.system('dd if=working/' + image + ' of=working/' + image + '-ramdisk.gz'
                 + ' skip=8 bs=1 count=20000000')
         else:
-            logging.info('kitchen_utils::unpack_recovery boot.img unpack with split_boot')
-            kpath = KitchenConfig.KitchenConfig.KitchenPath
-            cmd = os.path.join(kpath, 'scripts/split_bootimg.pl') + ' ' + filepath      
-            logging.debug('kitchen_utils::unpack_recovery :' + filepath)
-            logging.debug('kitchen_utils::unpack_recovery :' + cmd)
             
-            os.system(cmd)
+            unpackBootRecoveryfile(filepath)
             logging.debug('kitchen_utils::unpack_recovery :')
-            shutil.move(image +'-ramdisk.gz','working/')
-            shutil.move(image +'-kernel','working/')
-        
+            
         imagefolder = os.path.join('working', folder)    
         CheckMakeFolders([imagefolder])       
         os.chdir(imagefolder)
@@ -321,4 +315,103 @@ def unpackboot_recovery(image):
     except Exception as e:
         logerror('kitchen_utils::unpackboot_recovery ',e,1)
         
-         
+
+def unpackBootRecoveryfile(thefile):
+    
+    try:
+        go_on = 0
+        with open(thefile,'r') as f:
+            check = f.read(8)
+            if check == 'ANDROID!':
+                go_on=1
+            
+                kernel = makeimage('Kernel',f)
+                ramdisk = makeimage('Ramdisk',f)
+                sramdisk = makeimage('Second Ramdisk',f)
+                baseaddress = getint(f.read(4))
+                pagesize = getint(f.read(4))
+                kernel.setpagesize(pagesize)
+                kernel.Offset = pagesize
+                ramdisk.Offset = kernel.NextPageStart()
+                sramdisk.Offset = ramdisk.NextPageStart()     
+     
+        if go_on ==1:
+            kernel.writeimage(thefile,thefile + '-kernel')
+            ramdisk.writeimage(thefile,thefile + '-ramdisk.gz')
+            if sramdisk.Size != 0:
+                sramdisk.writeimage(thefile,thefile + '-sramdisk.gz')
+
+    except Exception as e:
+        logerror('kitchen_utils::unpackBootRecoveryfile ',e,1)
+                          
+        
+def makeimage(iname,f):
+    try:
+        s = getint(f.read(4))
+        a = getint(f.read(4))       
+        return part(iname,s,a) 
+    except Exception as e:
+        logerror('kitchen_utils::makeimage ',e,1)
+
+def getint(data):
+    return struct.unpack('i',data)[0]         
+
+    
+class part:
+    _pagesize = 0
+    
+    def __init__(self,name,size,offset):
+        try:
+            self.Name = name.strip()
+            self.Size = size
+            self.Offset = offset
+            part._pagesize = 0
+        except Exception as e:
+            logerror('kitchen_utils::part::__init__ ',e,1)
+        
+ 
+    def NextPageStart(self):
+        try:
+            return self.getpages() * part._pagesize + self.Offset
+        except Exception as e:
+            logerror('kitchen_utils::part::NextPageStart ',e,1)
+            
+            
+    
+    def getpages(self):
+        try:
+            return int((self.Size + part._pagesize - 1) / part._pagesize)
+        except Exception as e:
+            logerror('kitchen_utils::part::getpages ',e,1)
+        
+        
+        
+    def setpagesize(self,pgsize):
+        try:
+            part._pagesize = pgsize
+        except Exception as e:
+            logerror('kitchen_utils::part::setpagesize ',e,1)
+        
+        
+    def writeimage(self,sourcefile,imagename):
+        try:
+            with open(sourcefile,'r') as s:
+                print 'write file starting at ' + str(self.Offset)
+                print 'size ' + str(self.Size)
+                discard = s.read(self.Offset)
+                buff = s.read(self.Size)
+                print len(buff)
+                with open(imagename,'w') as w:
+                    w.write(buff)
+        except Exception as e:
+            logerror('kitchen_utils::part::writeimage ',e,1)
+        
+            
+    def __str__(self):
+        try:
+            return self.Name + ': ' + str(self.Size) + ' ' + hex(self.Size) + ' ' + str(self.Offset)
+        except Exception as e:
+            logerror('kitchen_utils::part::__str__ ',e,1)
+            
+                
+        
