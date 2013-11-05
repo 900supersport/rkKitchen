@@ -147,27 +147,19 @@ def getkerneldata():
     except Exception as e:
         logerror('kernel::getkerneldata ',e,1)
 
-        
-def findstring(f, s,size):
+
+def findstring(f, target, size):
     '''find the first occurance of the string s in the file f
 
     '''
-    try:
-        l = len(s) 
-        o = 0
-        f.seek(o)
-        buff=f.read(l)
-        while buff != s and o != size:
-            #print o
-            o = o + 1
-            f.seek(o)
-            buff=f.read(l)
-        if o != size:
-            return o + l  
-        else:
-            return -1
-    except Exception as e:
-        logerror('kernel::findstring ',e,1)
+    l = len(target) 
+    buff=f.read(l)
+    while buff != target and f.tell() < size:
+        buff=buff[1:] +f.read(1)
+    if f.tell() != size:
+        return  f.tell() 
+    else:
+        return -1
         
 
 def brandkernel():   
