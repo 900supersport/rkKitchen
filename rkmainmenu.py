@@ -270,7 +270,7 @@ def cleanroot():
         #os.system('sudo chmod 6755 working/mntsystem/bin/su')
         #os.system('sudo ls -l working/mntsystem/bin/su')    
         
-        makebusyboxlinks(os.path.join(kc.KitchenPath, 'bblinks/makelinks'))
+        makebusyboxlinks(os.path.join(kc.KitchenPath, 'processcontrol/makelinks'))
         CheckMakeFoldersRoot(['working/mntsystem/etc/init.d'])
 
         pprint('=')

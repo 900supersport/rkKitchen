@@ -115,28 +115,40 @@ def getkerneldata():
 
     
     try:
-        with open('working/kernel.img', 'r') as fr:
-            o = findstring(fr,'ppllogo_RKlogo_clut') 
-            fr.seek(o)
-            
-            cluto = o
-            pl = int(fr.read(1).encode('hex'),16)
-            
-            o = findstring(fr,'logo_RKlogo_data') 
-            fr.seek(o)
-            
-            datao = o
-            
-            w=int(fr.read(2).encode('hex'),16)
-            h=int( fr.read(2).encode('hex'),16)
-            ds = w * h + 4       
-            rominfo.rominfo.kernelImageSize = '{0:d}'.format(w) + ':' + '{0:d}'.format(h)      
+        fpath = 'working/kernel.img'
+        s = os.stat(fpath).st_size
+        logging.info('kernel size ')
+        logging.info(s)
+        
+        with open(fpath, 'r') as fr:
+            o = findstring(fr,'ppllogo_RKlogo_clut',s) 
+            logging.info('kernel::getkerneldata o:' )
+            logging.info(o)
+            if o>= 0:
+                fr.seek(o)
+                
+                cluto = o
+                pl = int(fr.read(1).encode('hex'),16)
+                
+                
+                o = findstring(fr,'logo_RKlogo_data',s) 
+                logging.info('kernel::getkerneldata o:' )
+                logging.info(o )
+                if o>0:
+                    fr.seek(o)
+                    
+                    datao = o
+                    
+                    w=int(fr.read(2).encode('hex'),16)
+                    h=int( fr.read(2).encode('hex'),16)
+                    ds = w * h + 4       
+                    rominfo.rominfo.kernelImageSize = '{0:d}'.format(w) + ':' + '{0:d}'.format(h)      
         
     except Exception as e:
         logerror('kernel::getkerneldata ',e,1)
 
         
-def findstring(f, s):
+def findstring(f, s,size):
     '''find the first occurance of the string s in the file f
 
     '''
@@ -144,11 +156,16 @@ def findstring(f, s):
         l = len(s) 
         o = 0
         f.seek(o)
-        while f.read(l) != s:
+        buff=f.read(l)
+        while buff != s and o != size:
+            #print o
             o = o + 1
             f.seek(o)
-        
-        return o + l  
+            buff=f.read(l)
+        if o != size:
+            return o + l  
+        else:
+            return -1
     except Exception as e:
         logerror('kernel::findstring ',e,1)
         

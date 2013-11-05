@@ -22,6 +22,7 @@ G, android.hardware.location.gps.xml, etc/permissions/, 0o644
 G, AppInjector_v1.3.0.apk, app/, 0o644
 G, FileSystemManager_v0.3.0.apk, app/, 0o644
 G, Reboot_v0.9.3.apk, app/, 0o644
+G, flash_image, bin/, 0o755
 
 L, bootanimation.zip, media/, 0o755
 
