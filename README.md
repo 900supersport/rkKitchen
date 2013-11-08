@@ -6,7 +6,7 @@ rkKitchen
 FreakTabKitchen www.freaktab.com
 
 Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
-=============================================================
+=========
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
