@@ -1,0 +1,17 @@
+#this file controls move to preinstall process
+#
+#lines staring # and empty will be treated as comments
+#
+#each line is of the form 
+#   movefilepathnam, movedestination
+#
+
+app/Email.apk, preinstall/                         
+app/Exchange2.apk, preinstall/     
+app/Gmail.apk, preinstall/   
+
+app/RkExplorer.apk, preinstall/ 
+app/DeskClock.apk, preinstall/            
+app/LatinIME.apk, preinstall/                  
+app/RkVideoPlayer.apk, preinstall/ 
+

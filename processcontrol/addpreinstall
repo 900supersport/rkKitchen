@@ -1,0 +1,10 @@
+#preinstall  add preinstall support to boot/init.rc
+service preinstall /system/bin/preinstall.sh
+    class main
+    group root root
+    oneshot
+    disabled
+
+on property:dev.bootcomplete=1
+    start preinstall
+
