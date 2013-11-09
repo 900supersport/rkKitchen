@@ -5,6 +5,8 @@ rkKitchen
 
 FreakTabKitchen www.freaktab.com
 
+See http://www.freaktab.com/showthread.php?8042-FreakTab-RK-ROM-Kitchen-by-900supersport-v2 for installation and set-up
+
 Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 =========
 This program is free software: you can redistribute it and/or modify
