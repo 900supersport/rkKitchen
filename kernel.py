@@ -24,6 +24,7 @@
 import os
 import shutil
 import logging
+#import bitstring
 
 import rominfo
 
@@ -160,6 +161,69 @@ def findstring(f, target, size):
         return  f.tell() 
     else:
         return -1
+            
+
+#1080P
+#OK patch #1:
+#Find the second instance (not the first) of this hex value
+#056ca0e3
+#You will know you have found this because shortly after it will be the next patch location
+#2d6ea0e3
+#
+#so patch 056ca0e3 to 1e6da0e3
+#and patch 2d6ea0e3 to d26f46e2
+#
+#Patch #2
+#After the above location find the next value:
+#dc40a0e3 and patch to 9440a0e3
+#Then find the next value:
+#6e40a0e3 and patch to 5840a0e3
+#Then find the next value:
+#2840a0e3 and patch to 2c40a0e3
+##Then find the next value:
+#1440a0e3 and patch to 2440a0e3
+
+#Patch #3 final patch
+##Now follow on down to this value:
+#0b06a0e3 and patch to 0605a0e3
+#
+#Your now done patching to 1080. 
+#
+#But in my opinion you should also patch the kernel build name and version so people can see it is a different kernel that the 720 kernel. I usually add 1080 to the #kernel build name.
+#When you go into setting in Android and about this device you will see the kernel build name and version.
+#Search for this text in the kernel binary and edit it. REMEMBER you cannot make this longer or shorter! So edit it with the same amount of characters.
+
+#Now just add the RKCRC header to make kernel.bin kernel.img
+#command:
+#./rkcrc -k kernel.bin kernel1080.img
+#def kernelto1080p():
+#    try:
+#        print
+#        print
+#        pprint('=')
+#        pprint('... Branding Kernel ')
+#        pprint('... opening  working/kerneltmp.img for read')
+#        
+#        s = os.stat(fpath).st_size
+#        with open('working/kernel.img', 'rb') as fr:
+#            s=BitArray(fr)
+#            
+#        dummy = s.find(0x056ca0e3,bytealigned=True)
+#        p1a = s.find(0x056ca0e3,dummy+8,bytealigned=True) #'0x1e6da0e3'
+#        p1b = s.find(0x2d6ea0e3,p1a+8,bytealigned=True)  #'0x1e6da0e3'      
+#            
+#        p2a = s.find(0xdc40a0e3,p1b+8,bytealigned=True)  #'0x9440a0e3'
+#        p2b = s.find(0x6e40a0e3,p2a+8,bytealigned=True)  #'0x5840a0e3'
+#        p2c = s.find(0x2840a0e3,p2b+8,bytealigned=True)  #'0x2c40a0e3'
+#        p2d = s.find(0x1440a0e33,p2c+8,bytealigned=True)  #'0x2440a0e3'   
+#            
+#        p3a = s.find(0x0b06a0e3,p2d+8,bytealigned=True)  #'0x0605a0e3'         
+#            
+#        print p1a,p1b,p2a,p2b,p2c,p2d,p3a
+#        logging.info(p1a,p1b,p2a,p2b,p2c,p2d,p3a)    
+#    except Exception as e:
+#        logerror('kernel::kernelto1080p ',e,1)      
+        
         
 
 def brandkernel():   

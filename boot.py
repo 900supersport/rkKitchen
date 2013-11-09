@@ -89,6 +89,21 @@ def bootmenu():
     except Exception as e:
         logerror('boot::bootmenu ',e,1)
 
+
+def addpreinstall(openforreview):
+    '''query add preinstall support'''
+    
+    try:
+        path = 'working/boot/init.rc'
+        spath = os.path.join(KitchenConfig.KitchenConfig.KitchenPath, 'processcontrol/addpreinstall')
+        with open(spath,'r') as sf:
+            query_add(path, 'service preinstall', sf.read())
+
+                    
+        if openforreview ==1:            
+            os.system('sudo ' + KitchenConfig.KitchenConfig.editor + ' ' + path)
+    except Exception as e:
+        logerror('boot::addinitd_support ',e,1)
         
 def addinitd_support(openforreview):
     '''query add init.d support'''

@@ -33,10 +33,10 @@ import rominfo
 #import boot
 
 
-from boot import brand_boot, initrc_mount_system_rw, addinitd_support,unpackboot , finalise_boot  
+from boot import brand_boot, initrc_mount_system_rw,addpreinstall, addinitd_support,unpackboot , finalise_boot  
 from kitchenUI import header, pprint, mymenu
 from utils import CheckMakeFolders, finalisefilesystemimage, mountfileasfilesystem, CheckMakeFoldersRoot, apply_sed, checkfsimage, logerror
-from kitchen_utils import browse,removefiles,deployfiles
+from kitchen_utils import browse,removefiles,deployfiles,movefiles
 
 from parameter import parse_parameter,parameter_menu
 from system import mountsystem, extendBuildprop, finalisesystem, growsystem, shrinksystem, makebusyboxlinks, resizerequired, systemmenu
@@ -264,6 +264,7 @@ def cleanroot():
         pprint('= add Busybox for init.d')
         pprint('=')
 
+        movefiles(os.path.join(kc.KitchenPath, 'processcontrol/movepreinstall'))
         deployfiles(os.path.join(kc.KitchenPath, 'processcontrol/deploy'),'working/mntsystem',0)
         
         #os.system('sudo cp working/mntsystem/xbin/su working/mntsystem/bin/')
@@ -297,7 +298,8 @@ def cleanroot():
         #boot stuff
         unpackboot() 
         initrc_mount_system_rw(0)
-        addinitd_support(1)
+        addinitd_support(0)
+        addpreinstall(1)
         brand_boot(1)
         finalise_boot()       
             

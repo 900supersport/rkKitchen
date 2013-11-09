@@ -105,6 +105,46 @@ def custom_deploy(deploypath):
     except Exception as e:
         logerror('kitchen_utils::custom_deploy ',e,1)
     
+def movefiles(movefilename):
+    '''move files 
+    
+    sample
+    G, Superuser.apk, app/, 644
+    '''
+    
+    try:
+        serr=''
+        sourceroot = 'working/mntsystem/'
+        path = os.path.expanduser(movefilename)
+        
+        with open(path,'r') as f:
+            for line in f:
+                cl = line.strip();
+#                print cl
+                if cl[:1] <> '#' and len(cl) > 0:
+                    args = cl.split(',')
+                     
+                    try:
+                        if os.path.exists(os.path.join(sourceroot, args[0].strip())):
+                            dest = os.path.join(sourceroot, args[1].strip())
+                            CheckMakeFoldersRoot([dest])
+                        
+                            moves = 'sudo mv ' + os.path.join(sourceroot, args[0].strip()) + ' ' + dest
+                           
+                            logging.debug('moves :' + moves)
+                            os.system(moves)   
+                    except IOError as e:
+                        logerror(e)
+                        serr = serr + 'could not move ' + sourceroot.strip() + args[0].strip() + '\n'   
+        
+        if serr <> '':
+            print serr
+            choice=raw_input('Press enter to continue')  
+    
+    except Exception as e:
+        logerror('kitchen_utils::movefiles ',e,1)
+
+
     
 def deployfiles(deployfilename,deploydest,openforreview):
     '''deploy files 
