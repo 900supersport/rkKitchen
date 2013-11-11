@@ -27,6 +27,7 @@ import shutil
 import glob
 import time
 import struct
+import zipfile
 
 #900supersport imports
 import KitchenConfig
@@ -104,6 +105,73 @@ def custom_deploy(deploypath):
         deployfiles(dfile,deploypath,1)
     except Exception as e:
         logerror('kitchen_utils::custom_deploy ',e,1)
+
+def copyfilesworker(movefilename,sourceroot,asroot):
+    mvcpfilesworker(movefilename,sourceroot,'cp',asroot)
+
+
+def movefilesworker(movefilename,sourceroot,asroot = 1 ):
+    mvcpfilesworker(movefilename,sourceroot,'mv',asroot)
+
+def mvcpfilesworker(movefilename,sourceroot,op,asroot):
+    try:
+        serr=''
+        path = os.path.expanduser(movefilename)
+        
+        with open(path,'r') as f:
+            for line in f:
+                cl = line.strip();
+                if cl[:1] <> '#' and len(cl) > 0:
+                    args = cl.split(',')
+                    source = os.path.join(sourceroot, args[0].strip())
+                    dest = os.path.join(sourceroot, args[1].strip())
+                    if len(args) > 2:
+                        destpath = args[2].strip()
+                    else:
+                        destpath = ''
+                    
+                    pth,fn =os.path.split(source)
+                    
+                    fn= os.path.join(destpath,fn)
+                    logging.debug('kitchen_utils::mvcpfilesworker source' + source)
+                    logging.debug('kitchen_utils::mvcpfilesworker dest' +  dest)
+                    iszip = 0
+                    lendest = len(dest)
+                    if lendest > 3:
+                        if dest[lendest-3:] == 'zip':
+                            iszip = 1
+                    logging.debug('kitchen_utils::mvcpfilesworker iszip' + str(iszip))
+                    try:
+                        if os.path.exists(source):
+                            if iszip == 1:
+                                logging.debug('kitchen_utils::mvcpfilesworker ' + dest)
+                                zf = zipfile.ZipFile(dest,mode='a')
+                                #zf.printdir()
+                                zf.write(source,fn)
+                                zf.close()
+                            else:
+                                logging.info('kitchen_utils::mvcpfilesworker ')
+                                logging.info([dest])
+                                CheckMakeFoldersRoot([dest])
+                                moves = op + ' ' + source + ' ' + dest
+                                if asroot==1:
+                                    moves = 'sudo ' + moves
+                                logging.debug('kitchen_utils::mvcpfilesworker moves :' + moves)
+                                os.system(moves)  
+                        else:
+                            logging.debug('kitchen_utils::mvcpfilesworker source does not exist Source= ' + source)
+                    except IOError as e:
+                        logerror('kitchen_utils::mvcpfilesworker inner ',e,1)
+                        serr = serr + 'could not move ' + sourceroot.strip() + args[0].strip() + '\n'   
+        
+        if serr <> '':
+            print serr
+            choice=raw_input('Press enter to continue')  
+    
+    except Exception as e:
+        logerror('kitchen_utils::mvcpfilesworker ',e,1)
+
+
     
 def movefiles(movefilename):
     '''move files 
@@ -113,33 +181,8 @@ def movefiles(movefilename):
     '''
     
     try:
-        serr=''
-        sourceroot = 'working/mntsystem/'
+        movefilesworker(movefilename, 'working/mntsystem/')
         path = os.path.expanduser(movefilename)
-        
-        with open(path,'r') as f:
-            for line in f:
-                cl = line.strip();
-#                print cl
-                if cl[:1] <> '#' and len(cl) > 0:
-                    args = cl.split(',')
-                     
-                    try:
-                        if os.path.exists(os.path.join(sourceroot, args[0].strip())):
-                            dest = os.path.join(sourceroot, args[1].strip())
-                            CheckMakeFoldersRoot([dest])
-                        
-                            moves = 'sudo mv ' + os.path.join(sourceroot, args[0].strip()) + ' ' + dest
-                           
-                            logging.debug('moves :' + moves)
-                            os.system(moves)   
-                    except IOError as e:
-                        logerror(e)
-                        serr = serr + 'could not move ' + sourceroot.strip() + args[0].strip() + '\n'   
-        
-        if serr <> '':
-            print serr
-            choice=raw_input('Press enter to continue')  
     
     except Exception as e:
         logerror('kitchen_utils::movefiles ',e,1)
@@ -162,21 +205,18 @@ def deployfiles(deployfilename,deploydest,openforreview):
         with open(path,'r') as f:
             for line in f:
                 cl = line.strip();
-#                print cl
                 if cl[:1] <> '#' and len(cl) > 0:
                     args = cl.split(',')
                     sourceroot = ''
                     if args[0] == 'G':
                         sourceroot = globalroot
-                        #sourceroot = os.path.expanduser('~/pykitchen/deployfiles/').strip()
                     elif args[0] == 'L':
                         sourceroot = localroot
-                        #'localdeploy/'.strip()
-#                    print sourceroot + args[1].strip()
-#                    print deploydest + '/' + args[2].strip() 
                     try:
-                        if os.path.exists(os.path.join(sourceroot, args[1].strip())):
-                            copys = 'sudo cp ' + os.path.join(sourceroot, args[1].strip()) + ' ' + os.path.join(deploydest, args[2].strip())
+                        tgt = os.path.join(sourceroot, args[1].strip())
+                        logging.info('kitchen_utils::deployfiles attempt deploy ' + tgt)
+                        if os.path.exists(tgt):
+                            copys = 'sudo cp ' + tgt + ' ' + os.path.join(deploydest, args[2].strip())
                             chmods = 'sudo chmod '  + args[3][3:] + ' ' + os.path.join(deploydest, args[2].strip(), args[1].strip())
                             logging.debug('copy :' + copys)
                             logging.debug('chmod :' + chmods)   
@@ -184,6 +224,7 @@ def deployfiles(deployfilename,deploydest,openforreview):
                             os.system(chmods)
                     except IOError as e:
                         logerror(e)
+                        
                         serr = serr + 'could not deploy ' + sourceroot.strip() + args[1].strip() + '\n'   
         
         if serr <> '':

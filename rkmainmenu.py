@@ -26,6 +26,7 @@ import logging
 import shutil
 import glob
 import time
+import shutil
 
 #900supersport imports
 import KitchenConfig
@@ -35,8 +36,8 @@ import rominfo
 
 from boot import brand_boot, initrc_mount_system_rw,addpreinstall, addinitd_support,unpackboot , finalise_boot  
 from kitchenUI import header, pprint, mymenu
-from utils import CheckMakeFolders, finalisefilesystemimage, mountfileasfilesystem, CheckMakeFoldersRoot, apply_sed, checkfsimage, logerror
-from kitchen_utils import browse,removefiles,deployfiles,movefiles
+from utils import CheckMakeFolders, finalisefilesystemimage, mountfileasfilesystem, CheckMakeFoldersRoot, apply_sed, checkfsimage, logerror,zipfolder
+from kitchen_utils import browse,removefiles,deployfiles,movefiles,copyfilesworker
 
 from parameter import parse_parameter,parameter_menu
 from system import mountsystem, extendBuildprop, finalisesystem, growsystem, shrinksystem, makebusyboxlinks, resizerequired, systemmenu
@@ -62,7 +63,10 @@ def rkmainmenu():
         
         main_menu = dict([
             ('a1', 'Pick up img and create locations'), 
-            ('d2', 'Clean, brand and root system and boot images'), 
+            ('b2', 'Clean, brand and root system and boot images'), 
+            ('c3', 'Make ROM kits'),  
+            ('d4', 'Clean workspace (removes working files)'), 
+            #('f5', 'Wipe workspace, and unpacked'),
             ('g=', '='), 
             ('hb', 'boot menu'),
             ('ir', 'recovery menu'),
@@ -85,7 +89,13 @@ def rkmainmenu():
         if choice in ('1'):
             setworkingROM()
         elif choice in ('2'):
-            cleanroot();
+            cleanroot()
+        elif choice in ('3'):
+            makeROMkits()
+        elif choice in ('4'):
+            cleanworkspace()
+        #elif choice in ('5'):
+        #    wipeworkspace()
         elif choice in ('b','B'):
             bootmenu()
         elif choice in ('s','S'):
@@ -111,7 +121,70 @@ def rkmainmenu():
             rkmainmenu()
         
     except Exception as e:
-        logerror('FreakTabKitchen::menu ',e,1)
+        logerror('rkmainmenu::menu ',e,1)
+        
+
+
+def wipeworkspace():
+    cleanworkspace()
+    
+def cleanworkspace():
+    try:
+        cont = 'Y'
+        rn = rominfo.rominfo.romname
+        rimg = rominfo.rominfo.romimgfilename
+        
+        src = os.path.join('sources',rn,rimg)
+        dst = rimg
+        
+        #retrieve original img file
+        if os.path.isfile(src):
+            os.system('mv ' + src + ' ' + dst)
+        else:
+            cont = raw_input('No ROM image found \n' + src + '\n\nContinue Y/N:')
+        
+        #retrieve and archive any pulled images    
+        if cont in ('Y', 'y'):
+            zipfolder('read','ReadImages.zip')
+            zipfolder('localdeploy','localdeploy.zip')
+
+            os.system('sudo rm -rf working')
+            shutil.rmtree('localdeploy')
+            shutil.rmtree('sources')
+            shutil.rmtree('read')
+    except Exception as e:
+        logerror('rkmainmenu::recursive_zip ',e,1)
+        
+        
+def makeROMkits():
+    '''make ROM kits based on current templates
+   
+    This is a run once process
+'''
+    try:
+        src = os.path.join(KitchenConfig.KitchenConfig.KitchenPath, 'ROMtemplates/')
+        dst = 'ROMKits/'
+        pprint ('Copying from ' + src + ' to ' + dst)
+        
+        shutil.copytree(src,dst)
+        pprint ('Adding images to ROM Kits')
+        pcfilesrc = os.path.join(KitchenConfig.KitchenConfig.KitchenPath,'processcontrol/populateROMkits')
+        copyfilesworker(pcfilesrc,'',0)
+        
+        src = 'CWMROMKit.zip'
+        tgt = os.path.join(dst,rominfo.rominfo.romname.strip() + '_' + src)
+        src = os.path.join(dst,src)
+        os.system('mv ' + src + ' ' + tgt)
+        
+        src = 'ROMKit.zip'
+        tgt = os.path.join(dst,rominfo.rominfo.romname.strip() + '_' + src)
+        src = os.path.join(dst,src)
+        os.system('mv ' + src + ' ' + tgt)
+                
+    
+    except Exception as e:
+        logerror('rkmainmenu::makeROMkits ',e,1)
+
         
 def setworkingROM():
     '''get an image and start the ROM kitchen process on it

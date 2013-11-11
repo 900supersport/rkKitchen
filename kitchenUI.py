@@ -70,6 +70,7 @@ def header():
         pprint( 'FreakTab RK ROM Kitchen by 900supersport v2.0.0')
         pprint( 'Brian Mahoney')
         pprint( '19 Oct 2013')
+        pprint( 'www.freaktab.com')
         pprint( '=')
         pprint( 'Current ROM ' + rominfo.rominfo.romname)
         pprint( 'CWD ' + KitchenConfig.KitchenConfig.cwd)

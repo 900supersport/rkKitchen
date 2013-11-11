@@ -25,11 +25,13 @@
 #python imports
 import sys
 import logging
+import os
 
 #900supersport imports
 import KitchenConfig
 import rominfo
 
+from kitchen_utils import pprint
 from utils import CheckMakeFolders, GetCWD, logerror
 from rkmainmenu import rkmainmenu
 
@@ -45,6 +47,12 @@ def StartKitchen():
     
 The actual Kitchen Config and if present the rominfo in the current workspace will be read, required folders as per config will be created, and then the rkmainmenu will be displayed.
 '''
+
+    if GetCWD() =='/home/brian/rkKitchen':
+        os.chdir('/home/brian/Desktop/ROMS/cube/u30gt2/2.06_official')
+        print GetCWD
+        
+        
     logmode = logging.INFO
     writemode = 'a'
     filename = 'kitchen.log'
@@ -77,13 +85,19 @@ The actual Kitchen Config and if present the rominfo in the current workspace wi
 
         CheckMakeFolders(kc.KitchenFolders())
 
+
         rkmainmenu()
         kc.Pickle()
         ri.Pickle()
     except Exception as e:
         logerror('FreakTabKitchen::StartKitchen ',e,1)
     finally:
-        print 'Thankyou for using 900supersport''s FreakTab RK Kitchen'
-
+        pprint ('=')
+        pprint ('Thank you for using 900supersport''s FreakTab RK Kitchen')
+        pprint ('')
+        pprint ('For support or even just to say thanks see')
+        pprint ('=')
+        pprint ('http://www.freaktab.com/showthread.php?8042-FreakTab-RK-ROM-Kitchen-by-900supersport-v2')
+        print 
 StartKitchen()
 

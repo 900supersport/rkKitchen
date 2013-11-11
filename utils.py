@@ -25,12 +25,49 @@ import os
 import pickle
 import logging
 import traceback
+import zipfile
 
 #    try:
 #        
 #    except Exception as e:
 #        logerror('utils::mountsystem ' , e, 1)
-#        #raise
+#        
+
+def zipfolder(sourcefolder,zipfilename):
+    '''creates a zipfolder containing as an archive of sourcefolder
+    
+    if there are no files to be archived then the zip will be removed
+    '''
+    try:
+        if os.path.isfile(zipfilename):
+            mode = 'a'
+        else:
+            mode = 'w'
+            
+        zf = zipfile.ZipFile(zipfilename,mode)
+        hasdata = recursive_zip(zf,sourcefolder)
+        zf.close()
+        if hasdata == 0 and mode =='w' :
+            os.system(zipfilename)
+
+    except Exception as e:
+        logerror('utils::zipfolder ',e,1)
+
+def recursive_zip(zipf, directory, folder = ""):
+    try:
+        append = 0
+        for item in os.listdir(directory):
+            if os.path.isfile(os.path.join(directory, item)):
+                zipf.write(os.path.join(directory, item), os.path.join(folder, item))
+                append = 1
+            elif os.path.isdir(os.path.join(directory, item)):
+                if recursive_zip(zipf, os.path.join(directory, item), os.path.join(folder, item)) == 1:
+                    append = 1
+        return append
+        
+    except Exception as e:
+        logerror('utils::recursive_zip ',e,1)
+
 
 def GetCWD():
     return os.getcwd()
@@ -43,7 +80,7 @@ def CheckMakeFolders(folderlist):
             CheckMakeFolderW(dp,0)
     except Exception as e:
         logerror('utils::CheckMakeFolders ' , e, 1)
-        #raise
+        
 
 
 def CheckMakeFoldersRoot(folderlist):
@@ -54,7 +91,7 @@ def CheckMakeFoldersRoot(folderlist):
             CheckMakeFolderW(dp,1)
     except Exception as e:
         logerror('utils::CheckMakeFoldersRoot ' , e, 1)
-        #raise
+        
         
         
 def CheckMakeFolder(dirpath):
@@ -67,7 +104,7 @@ def CheckMakeFolder(dirpath):
         CheckMakeFolderW(dirpath,0)
     except Exception as e:
         logerror('utils::CheckMakeFolder ' , e, 1)
-        #raise        
+                
         
 
 def CheckMakeFolderW(dirpath,asroot):
@@ -82,15 +119,21 @@ def CheckMakeFolderW(dirpath,asroot):
     try:
         if not os.path.isdir(dirpath):
             logging.debug('Making Folder :' + dirpath)
+            logging.debug('as root :' + str(asroot))
             if asroot ==1:
-                #note this is not recursive
+                rt,pt = os.path.split(dirpath)
+                if len(rt)>0:
+                    logging.info(rt)
+                    CheckMakeFolderW(rt,asroot)
+                logging.info(  'sudo mkdir ' + pt)  
                 os.system('sudo mkdir ' + dirpath)
             else:
-                os.makedirs(dirpath)
+                logging.debug('making with os.makedirs ' + dirpath)
+                os.makedirs(dirpath + '/')
             logging.debug('Made Folder :' + dirpath)
     except Exception as e:
         logerror('utils::CheckMakeFolderW ' , e, 1)
-        #raise 
+         
 
 
 def QueryPickleLoad(classvar, filepath):
@@ -110,7 +153,7 @@ def QueryPickleLoad(classvar, filepath):
             raise IOError
     except Exception as e:
         logerror('utils::QueryPickleLoad ' , e, 1)
-        #raise
+        
     finally:
         logging.debug('End QueryPickleLoad')
         return classvar
@@ -126,7 +169,7 @@ def PickleIt(classvar, filepath):
         print "I/O error({0}): {1}"#.format(e.errno, e.strerror)       
     except Exception as e:
         logerror('utils::PickleIt ' , e, 1)
-        #raise        
+                
     
 def apply_sed(sedfilepath,applytopath,openforreview):
     '''apply the sed statements from file sedfilepath to the file applytopath'''
@@ -144,7 +187,7 @@ def apply_sed(sedfilepath,applytopath,openforreview):
             os.system('sudo gedit ' + applytopath)
     except Exception as e:
         logerror('utils::apply_sed ' , e, 1)
-        #raise    
+            
 
 
 def umount(mountpoint):
@@ -154,7 +197,7 @@ def umount(mountpoint):
         os.system(systemstring)
     except Exception as e:
         logerror('utils::umount ' , e, 1)
-        #raise 
+         
             
 
 def finalisefilesystemimage(mount, image):
@@ -164,7 +207,7 @@ def finalisefilesystemimage(mount, image):
         checkfsimage(image) 
     except Exception as e:
         logerror('utils::finalisefilesystemimage ' , e, 1)
-        #raise     
+             
 
 def mountfileasfilesystem(mountfile, filesystemtype, mountpoint):    
     '''mount a files system to a mount point of the specifie type'''
@@ -176,7 +219,7 @@ def mountfileasfilesystem(mountfile, filesystemtype, mountpoint):
     except Exception as e:
         
         logerror('utils::mountfileasfilesystem ' , e, 1)
-        #raise      
+              
         
     logging.debug('End mountfileasfilesystem')
     

@@ -25,6 +25,7 @@
 import os
 import logging
 import KitchenConfig
+import time
 
 from utils import  QueryPickleLoad, PickleIt, logerror
 
@@ -65,6 +66,8 @@ class rominfo:
     kpanic = ''
     system = ''
     user = ''
+    
+    parameterfile = ''
     
     def __init__(self, rominfopath):
         '''Rom info
@@ -117,6 +120,7 @@ class rominfo:
                 rominfo.kpanic = reader.kpanic
                 rominfo.system = reader.system
                 rominfo.user = reader.user
+                rominfo.parameterfile = reader.parameterfile
 
             #copy values into self for pickle useage
             self.romname = rominfo.romname
@@ -146,10 +150,169 @@ class rominfo:
             self.kpanic = rominfo.kpanic
             self.system = rominfo.system
             self.user = rominfo.user
+            self.parameterfile = rominfo.parameterfile
         except Exception as e:
             logerror('rominfo::__init__ ' ,e ,1)
-            raise
+
+            
+    @staticmethod    
+    def storeparameterfile(filename,depth = 0):
+    
+        try:
+            with open(filename) as f:
+                rominfo.parameterfile = f.read()
+                    #read file
+            
+            with open(filename) as f:
+                myfile = f.readlines()
+            
+            #parse each line into 
+            for line in myfile:
+                cpos = line.find(':')
+                key = line[:cpos].strip()
+                value = line[cpos+1:].strip()
+                rominfo.setparm(key, value)
+                if key == 'CMDLINE':
+                    cmdlinedata = value.split(':')
+
+            #identify image data
+            for i,v in enumerate(cmdlinedata):
+                logging.info(i)
+                logging.info(v)
+                if v.find('(cache)') > 0 :
+                    idat = v 
+                    break
+
+            #parse image data
+            for i,v in enumerate(idat.split(',')):
+                tpos = v.find('@')
+                bpos = v.find('(')
+                size = v[:tpos]
+                offset = v[tpos+1:bpos]
+                image = v[bpos+1:].strip(')')
+                rominfo.setimage(image,offset,size)
         
+            rominfo.Pickle()
+
+            if depth==0:
+                #write additional parameter files based on this one
+                kc = KitchenConfig.KitchenConfig
+                for s in kc.parametersizes():
+                    rominfo.writeparameterfile(s)
+
+                os.system('rm working/parameter')
+                os.system('cp working/parameter' + str(kc.defaultuserdataG) + ' working/parameter')
+                time.sleep(2)
+                rominfo.storeparameterfile('working/parameter',1)
+
+            #now update based on the p file
+        except Exception as e:
+            logerror('rominfo::storeparameterfile ' ,e ,1)
+
+    @staticmethod
+    def applyparameterchanges():
+        '''Update the persisted parameter file with the current values and regenerate system.img and parameter files
+
+    '''
+        f = rominfo.parameterfile
+        kpendloc = f.find(',', f.find('(kpanic)'))+1
+        sysendloc = f.find(',', f.find('(system)'))+1
+        userendloc =  f.find('(user)')+6
+
+        npf = f[:kpendloc]
+        npf = npf + rominfo.submtdsize(f[kpendloc:sysendloc],rominfo.system.size)
+        npf = npf + rominfo.submtdoffset(f[sysendloc:userendloc],rominfo.user.offset)
+        npf = npf + f[userendloc:]
+
+        rominfo.parameterfile = npf
+
+        with open('working/parameter','w') as mp:
+            mp.write(npf)
+
+        rominfo.storeparameterfile('working/parameter')
+
+    @staticmethod
+    def newoffset(offset,growth):
+        '''calculate new offset based on offset and growth
+'''
+        return hex((long(offset,16) * 512 + growth) / 512)[:-1]
+
+    @staticmethod
+    def writeparameterfile(userdatasize):
+        '''write a parameter file with the specified userdata size
+'''
+        csh = rominfo.userdata.size
+        #print csh
+        currentsize = long(csh,16)* 512 
+        udsb = long(userdatasize) * 1024 * 1024 * 1024
+        growth = udsb - currentsize
+        #print growth
+        f = rominfo.parameterfile
+        if growth == 0:
+            npf = f
+        else:
+            chendloc = f.find(',', f.find('(cache)'))+1
+            udendloc = f.find(',', f.find('(userdata)'))+1
+            kpendloc = f.find(',', f.find('(kpanic)'))+1
+            sysendloc = f.find(',', f.find('(system)'))+1
+            userendloc =  f.find('(user)')+6
+
+            uds = f[chendloc:udendloc]
+            kps = f[udendloc:kpendloc]
+            syss = f[kpendloc:sysendloc]
+            us = f[sysendloc:userendloc]
+            rest = f[userendloc:]
+
+            nudsh = hex(udsb/512)[:-1]
+            uds = rominfo.submtdsize(uds,nudsh)
+
+            nkpo = rominfo.newoffset(rominfo.kpanic.offset,growth) 
+            nsyso = rominfo.newoffset(rominfo.system.offset,growth)
+            nuo = rominfo.newoffset(rominfo.user.offset,growth)
+            
+            kps = rominfo.submtdoffset(kps,nkpo)
+            syss = rominfo.submtdoffset(syss,nsyso)
+            us = rominfo.submtdoffset(us,nuo)
+
+            npf = f[:chendloc]
+            npf = npf + uds
+            npf = npf + kps
+            npf = npf + syss
+            npf = npf + us
+            npf = npf + rest
+
+            #0x00400000@0x00088000(userdata)
+            #0x00002000@0x00488000(kpanic) 
+            #0x00114000@0x0048A000(system) 
+            #-@0x0059E000(user) 
+            
+        with open('working/parameter' + str(userdatasize),'w') as f:
+            f.write(npf)
+
+
+    @staticmethod
+    def submtdsize(mtdstring,size):
+        '''substitues size in the mtdstring supplied
+    '''
+        #strip 0x
+        size = size[2:].upper()
+        mtdsize,mtdoffset = mtdstring.split('@')
+        return mtdsize[:-len(size)] + size + '@' + mtdoffset
+
+    @staticmethod
+    def submtdoffset(mtdstring,offset):
+        '''substitues size in the mtdstring supplied
+    '''
+        #strip 0x
+        offset = offset[2:].upper()
+        #offset = offset.upper
+        mtdsize,mtdoffset = mtdstring.split('@')
+        loc = mtdoffset.find('(')
+        newoffset = mtdoffset[:loc][:-len(offset)] + offset + mtdoffset[loc:]
+        
+        return mtdsize + '@'  + newoffset
+
+                                
     @staticmethod
     def setROMimgFilename(ROMimgFilename):
         '''static set ROMimgFilename and romname
@@ -240,6 +403,9 @@ class rominfo:
         elif image == 'kpanic':
             rominfo.kpanic = imageflashinfo(image,offset,size)
         elif image == 'system':
+            logging.info('rominfo::setimage system image ' + image)
+            logging.info('rominfo::setimage system offset ' + offset)
+            logging.info('rominfo::setimage system size ' + size)
             rominfo.system = imageflashinfo(image,offset,size)
         elif image == 'user':
             rominfo.user = imageflashinfo(image,offset,size)
@@ -277,6 +443,12 @@ class rominfo:
     
         kc = KitchenConfig.KitchenConfig
         rv = max(int(rominfo.system.size,16) * 512,kc.maxsystemsize)
+        #11:51:52,624 root INFO rominfo::systemsizeGrow current systemsize 576716800
+        #11:51:52,625 root INFO rominfo::systemsizeGrow current maxsystemsize 0
+        #11:51:52,625 root INFO rominfo::systemsizeGrow current rv 576716800
+        logging.info('rominfo::systemsizeGrow current systemsize ' +str(int(rominfo.system.size,16) * 512))
+        logging.info('rominfo::systemsizeGrow current maxsystemsize ' +str(kc.maxsystemsize))
+        logging.info('rominfo::systemsizeGrow current rv ' +str(rv))
         if rv ==0:
             rv = kc.defaultsystemsize
         return rv
@@ -286,6 +458,9 @@ class rominfo:
     
         kc = KitchenConfig.KitchenConfig
         rv = max(int(rominfo.system.size,16) * 512,kc.minsystemsize)
+        logging.info('rominfo::systemsizeShrink current systemsize ' +str(int(rominfo.system.size,16) * 512))
+        logging.info('rominfo::systemsizeShrink current minsystemsize ' +str(kc.minsystemsize))
+        logging.info('rominfo::systemsizeShrink current rv ' +str(rv))
         if rv ==0:
             rv = kc.defaultsystemsize
         return rv

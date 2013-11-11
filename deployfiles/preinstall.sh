@@ -24,12 +24,12 @@ then
 
     if [ -e /system/preinstall/recovery.img ]
     then
+        if [ ! -e /mnt/external_sd/autoinstall/noflashrecovery ]
+            flash_image recovery /system/preinstall/recovery.img
+            mount -o rw,remount /dev/block/mtdblock8 /system
+            mv /system/preinstall/recovery.img /system/preinstall/recovery.done
 
-        flash_image recovery /system/preinstall/recovery.img
-        mount -o rw,remount /dev/block/mtdblock8 /system
-        mv /system/preinstall/recovery.img /system/preinstall/recovery.done
-
-        mount -o ro,remount /dev/block/mtdblock8 /system
+            mount -o ro,remount /dev/block/mtdblock8 /system
     fi
 fi
 exit

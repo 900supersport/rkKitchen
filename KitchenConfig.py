@@ -49,6 +49,7 @@ class KitchenConfig:
     maxsystemsize = 0
     minsystemsize = 0
     defaultsystemsize = 576716800
+    defaultuserdataG = 4
     
     def __init__(self):
         '''initialise Kithchen Config
@@ -81,6 +82,8 @@ class KitchenConfig:
                 KitchenConfig.maxsystemsize = reader.maxsystemsize
                 KitchenConfig.minsystemsize = reader.minsystemsize
                 KitchenConfig.defaultsystemsize = reader.defaultsystemsize
+                KitchenConfig.defaultuserdataG = reader.defaultuserdataG
+                
                 
             #copy values into self for pickle useage
             self.editor = KitchenConfig.editor
@@ -88,7 +91,8 @@ class KitchenConfig:
             self.pwidth = KitchenConfig.pwidth 
             self.maxsystemsize = KitchenConfig.maxsystemsize 
             self.minsystemsize = KitchenConfig.minsystemsize 
-            self.defaultsystemsize = KitchenConfig.defaultsystemsize 
+            self.defaultsystemsize = KitchenConfig.defaultsystemsize
+            self.defaultuserdataG = KitchenConfig.defaultuserdataG
             
         except Exception as e:
             logging.error('KitchenConfig::__init__ ' )
@@ -111,7 +115,13 @@ class KitchenConfig:
                     ,'read'
                     ]
         return folders
- 
+
+    @staticmethod
+    def parametersizes():
+        '''List of parameter sizes
+    '''
+        return [2,4,6,8]
+        
     
     @staticmethod    
     def ROMInfoLoc():

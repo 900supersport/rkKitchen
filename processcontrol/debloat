@@ -28,6 +28,13 @@ app/RKEBookReader.apk, removed/app
 app/RenrenHD.apk, removed/app
 app/ucbrowser2.0.3.210.apk, removed/app
 app/UCBrowser2.0.3.210.apk, removed/app
+app/baidusousuo.apk, removed/app
+app/jiuyou.apk, removed/app
+app/kuwo.apk, removed/app
+app/oupeng8.apk, removed/app
+app/shuqi.apk, removed/app
+app/SogouAppMall.apk, removed/app
+app/yingyonghui.apk, removed/app
 
 
 app/AnZhi20130116.apk, removed/app
@@ -51,76 +58,4 @@ etc/permissions/com.android.location.provider.xml, removed/etc/permissions
 etc/permissions/android.hardware.location.xml, removed/etc/permissions
 etc/permissions/android.hardware.location.gps.xml, removed/etc/permissions
 #===============
-#ApplicationsProvider.apk
-#BackupRestoreConfirmation.apk
-#BooksProvider.apk
-#Browser.apk
-#Calendar.apk
-#CalendarProvider.apk
-#CertInstaller.apk
-#Chrome.apk
-#ChromeBookmarksSyncAdapter.apk
-#DefaultContainerService.apk
-#DeskClock.apk
-#DownloadProvider.apk
-#DownloadProviderUi.apk
-#DrmProvider.apk
-#Email.apk
-#Exchange2.apk
-#FaceLock.apk
-#Galaxy4.apk
-#Gallery2.apk
-#Gmail.apk
-#GmsCore.apk
-#GoogleBackupTransport.apk
-#GoogleCalendarSyncAdapter.apk
-#GoogleContactsSyncAdapter.apk
-#GoogleEars.apk
-#GoogleFeedback.apk
-#GoogleLoginService.apk
-#GooglePartnerSetup.apk
-#GoogleServicesFramework.apk
-#GoogleTTS.apk
-#HTMLViewer.apk
-#HoloSpiralWallpaper.apk
-#InputDevices.apk
-#KeyChain.apk
-#LatinIME.apk
-#Launcher2.apk
-#LiveWallpapers.apk
-#LiveWallpapersPicker.apk
-#MagicSmokeWallpapers.apk
-#MediaFloat.apk
-#MediaProvider.apk
-#MediaUploader.apk
-#MusicFX.apk
-#NetworkLocation.apk
-#NoiseField.apk
-#OneTimeInitializer.apk
-#PackageInstaller.apk
-#PhaseBeam.apk
-#Phone.apk
-#Phonesky.apk
-#PicoTts.apk
-#Provision.apk
-#QuickSearchBox.apk
-#RkApkinstaller.apk
-#RkExplorer.apk
-#RkVideoPlayer.apk
-#Settings.apk
-#SettingsProvider.apk
-#SharedStorageBackup.apk
-#SoundRecorder.apk
-#Superuser.apk
-#SystemUI.apk
-#TelephonyProvider.apk
-#UserDictionaryProvider.apk
-#Velvet.apk
-#VideoEditor.apk
-#VisualizationWallpapers.apk
-#VoiceSearchStub.apk
-#VpnDialogs.apk
-#WAPPushManager.apk
-#asus.apk
-#com.google.android.marvin.talkback.apk
-#flashplayer
+
