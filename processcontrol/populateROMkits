@@ -1,0 +1,16 @@
+#this file controls ROMkit poulation process
+#
+#lines staring # and empty will be treated as comments
+#
+#each line is of the form 
+#   sourcefilepathname, destination
+
+working/kernel.img,ROMKits/ROMKit.zip,ROM/
+working/boot.img,ROMKits/ROMKit.zip,ROM/
+working/recovery.img,ROMKits/ROMKit.zip,ROM/
+working/system.img,ROMKits/ROMKit.zip,ROM/
+
+working/kernel.img,ROMKits/CWMROMKit.zip
+working/boot.img,ROMKits/CWMROMKit.zip
+working/system.img,ROMKits/CWMROMKit.zip
+
