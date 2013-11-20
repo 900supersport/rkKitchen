@@ -45,8 +45,8 @@ from system import mountsystem, extendBuildprop, finalisesystem, growsystem, shr
 from boot import bootmenu
 from recovery import recoverymenu
 from kernel import kernel_menu, getkerneldata
-
 from flash import flash_menu
+from rkunpack import rkunpack
 
 #    try:
 #        
@@ -169,7 +169,7 @@ def makeROMkits():
         shutil.copytree(src,dst)
         pprint ('Adding images to ROM Kits')
         pcfilesrc = os.path.join(KitchenConfig.KitchenConfig.KitchenPath,'processcontrol/populateROMkits')
-        copyfilesworker(pcfilesrc,'',0)
+        copyfilesworker(pcfilesrc,'',0,verbose = 1)
         
         src = 'CWMROMKit.zip'
         tgt = os.path.join(dst,rominfo.rominfo.romname.strip() + '_' + src)
@@ -265,11 +265,12 @@ def unpackROM():
         if image.find(' ') > 0:
             image = "'" + image + "'"
         logging.debug('rkunpack ' + image)
-        os.system( 'rkunpack ' + image )
+        rkunpack(image)
+        #os.system( 'rkunpack ' + image )
         os.chdir(tcwd) 
     except Exception as e:
-        logging.debug('rkmainmenu::getROMFile ' )
-        logging.debug(e)
+        
+        logerror('rkmainmenu::getROMFile rkunpack fails ',e,0 )
         #now if this does not work try rkunpack
         try:
             os.system( 'unpack_all.sh ' 

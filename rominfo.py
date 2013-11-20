@@ -241,54 +241,57 @@ class rominfo:
     def writeparameterfile(userdatasize):
         '''write a parameter file with the specified userdata size
 '''
-        csh = rominfo.userdata.size
-        #print csh
-        currentsize = long(csh,16)* 512 
-        udsb = long(userdatasize) * 1024 * 1024 * 1024
-        growth = udsb - currentsize
-        #print growth
-        f = rominfo.parameterfile
-        if growth == 0:
-            npf = f
-        else:
-            chendloc = f.find(',', f.find('(cache)'))+1
-            udendloc = f.find(',', f.find('(userdata)'))+1
-            kpendloc = f.find(',', f.find('(kpanic)'))+1
-            sysendloc = f.find(',', f.find('(system)'))+1
-            userendloc =  f.find('(user)')+6
+        try:
+            csh = rominfo.userdata.size
+            #print csh
+            currentsize = long(csh,16)* 512 
+            udsb = long(userdatasize) * 1024 * 1024 * 1024
+            growth = udsb - currentsize
+            #print growth
+            f = rominfo.parameterfile
+            if growth == 0:
+                npf = f
+            else:
+                chendloc = f.find(',', f.find('(cache)'))+1
+                udendloc = f.find(',', f.find('(userdata)'))+1
+                kpendloc = f.find(',', f.find('(kpanic)'))+1
+                sysendloc = f.find(',', f.find('(system)'))+1
+                userendloc =  f.find('(user)')+6
 
-            uds = f[chendloc:udendloc]
-            kps = f[udendloc:kpendloc]
-            syss = f[kpendloc:sysendloc]
-            us = f[sysendloc:userendloc]
-            rest = f[userendloc:]
+                uds = f[chendloc:udendloc]
+                kps = f[udendloc:kpendloc]
+                syss = f[kpendloc:sysendloc]
+                us = f[sysendloc:userendloc]
+                rest = f[userendloc:]
 
-            nudsh = hex(udsb/512)[:-1]
-            uds = rominfo.submtdsize(uds,nudsh)
+                nudsh = hex(udsb/512)[:-1]
+                uds = rominfo.submtdsize(uds,nudsh)
 
-            nkpo = rominfo.newoffset(rominfo.kpanic.offset,growth) 
-            nsyso = rominfo.newoffset(rominfo.system.offset,growth)
-            nuo = rominfo.newoffset(rominfo.user.offset,growth)
+                nkpo = rominfo.newoffset(rominfo.kpanic.offset,growth) 
+                nsyso = rominfo.newoffset(rominfo.system.offset,growth)
+                nuo = rominfo.newoffset(rominfo.user.offset,growth)
+                
+                kps = rominfo.submtdoffset(kps,nkpo)
+                syss = rominfo.submtdoffset(syss,nsyso)
+                us = rominfo.submtdoffset(us,nuo)
+
+                npf = f[:chendloc]
+                npf = npf + uds
+                npf = npf + kps
+                npf = npf + syss
+                npf = npf + us
+                npf = npf + rest
+
+                #0x00400000@0x00088000(userdata)
+                #0x00002000@0x00488000(kpanic) 
+                #0x00114000@0x0048A000(system) 
+                #-@0x0059E000(user) 
+                
+            with open('working/parameter' + str(userdatasize),'w') as f:
+                f.write(npf)
+        except Exception as e:
+            logerror('rominfo::writeparameterfile ' ,e ,1)
             
-            kps = rominfo.submtdoffset(kps,nkpo)
-            syss = rominfo.submtdoffset(syss,nsyso)
-            us = rominfo.submtdoffset(us,nuo)
-
-            npf = f[:chendloc]
-            npf = npf + uds
-            npf = npf + kps
-            npf = npf + syss
-            npf = npf + us
-            npf = npf + rest
-
-            #0x00400000@0x00088000(userdata)
-            #0x00002000@0x00488000(kpanic) 
-            #0x00114000@0x0048A000(system) 
-            #-@0x0059E000(user) 
-            
-        with open('working/parameter' + str(userdatasize),'w') as f:
-            f.write(npf)
-
 
     @staticmethod
     def submtdsize(mtdstring,size):

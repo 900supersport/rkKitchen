@@ -79,6 +79,7 @@ The actual Kitchen Config and if present the rominfo in the current workspace wi
         kc = KitchenConfig.KitchenConfig
         kc()
         kc.cwd = GetCWD()
+        print 'use py crc = {}'.format(kc.usepycrc)
         
         ri = rominfo.rominfo
         ri(KitchenConfig.KitchenConfig.ROMInfoLoc())

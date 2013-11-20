@@ -7,12 +7,12 @@
 #
 #bloatpathname is rooted to system
 app/buyu.apk, removed/app
-app/cube.0.3.0_v2963.apk, removed/app
 app/Music.apk, removed/app
 app/Calculator.apk, removed/app
 app/CCCCACDE.apk, removed/app
 app/com.chaozh.iReaderFree_145459.apk, removed/app
 app/cube.apk, removed/app
+app/cube.0.3.0_v2963.apk, removed/app
 app/cube.0.3.1_v3313.apk, removed/app
 app/hd.apk, removed/app
 app/Music.apk, removed/app
@@ -36,6 +36,9 @@ app/shuqi.apk, removed/app
 app/SogouAppMall.apk, removed/app
 app/yingyonghui.apk, removed/app
 
+app/oupeng, removed/app
+app/SohuTV.apk, removed/app
+app/sougouinput.apk, removed/app
 
 app/AnZhi20130116.apk, removed/app
 app/com.cube.gfan_1032_cube_3965_0.9.7_v3965.apk, removed/app
@@ -47,6 +50,8 @@ app/TaoBao_20130308-1.6_3.4.2.apk, removed/app
 app/tmall_android_release_2.0.2_700414_5869.apk, removed/app
 app/UCBrowser_V2.2.2.259.apk, removed/app
 app/SohuTV2.8.apk, removed/app
+
+app/aimeituan.apk, removed/app
 
 
 #these are to be replaces so archive

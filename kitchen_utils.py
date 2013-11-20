@@ -28,10 +28,12 @@ import glob
 import time
 import struct
 import zipfile
+import zlib
 
 #900supersport imports
 import KitchenConfig
 import rominfo
+from rkcrc import rkcrc as crc
  
 from kitchenUI import header, pprint
 from utils import CheckMakeFolders, finalisefilesystemimage, mountfileasfilesystem, CheckMakeFoldersRoot, apply_sed, checkfsimage, logerror
@@ -42,6 +44,21 @@ from parameter import parse_parameter
 #    except Exception as e:
 #        logerror('kitchen_utils::mountsystem ',e,1)
 #        raise
+
+def rkcrc(flag, infile, outfile):
+    try:
+        kc = KitchenConfig.KitchenConfig
+        if kc.usepycrc == 0:
+            r = os.system('rkcrc ' + flag + ' ' + infile + ' ' + outfile)
+            if r > 256:
+                kc.usepycrc = 1
+                crc(flag, infile, outfile)
+        else:
+           crc(flag, infile, outfile)
+        
+    except Exception as e:
+        logerror('kitchen_utils::mountsystem ',e,1)
+        raise
 
 def query_add(path, check, addition):
     '''if check not found in path, append addition
@@ -106,14 +123,14 @@ def custom_deploy(deploypath):
     except Exception as e:
         logerror('kitchen_utils::custom_deploy ',e,1)
 
-def copyfilesworker(movefilename,sourceroot,asroot):
-    mvcpfilesworker(movefilename,sourceroot,'cp',asroot)
+def copyfilesworker(movefilename,sourceroot,asroot,verbose=0):
+    mvcpfilesworker(movefilename,sourceroot,'cp',asroot,verbose)
 
 
-def movefilesworker(movefilename,sourceroot,asroot = 1 ):
-    mvcpfilesworker(movefilename,sourceroot,'mv',asroot)
+def movefilesworker(movefilename,sourceroot,asroot = 1,verbose=0 ):
+    mvcpfilesworker(movefilename,sourceroot,'mv',asroot,verbose)
 
-def mvcpfilesworker(movefilename,sourceroot,op,asroot):
+def mvcpfilesworker(movefilename,sourceroot,op,asroot,verbose=0):
     try:
         serr=''
         path = os.path.expanduser(movefilename)
@@ -143,13 +160,18 @@ def mvcpfilesworker(movefilename,sourceroot,op,asroot):
                     logging.debug('kitchen_utils::mvcpfilesworker iszip' + str(iszip))
                     try:
                         if os.path.exists(source):
+                            
                             if iszip == 1:
+                                if verbose ==1:
+                                    pprint( 'Zipping {} size {:,} kb'.format(source,os.stat(source).st_size/1024))
                                 logging.debug('kitchen_utils::mvcpfilesworker ' + dest)
-                                zf = zipfile.ZipFile(dest,mode='a')
+                                zf = zipfile.ZipFile(file=dest,mode='a',compression=zipfile.ZIP_DEFLATED)
                                 #zf.printdir()
                                 zf.write(source,fn)
                                 zf.close()
                             else:
+                                if verbose ==1:
+                                    pprint( 'Processing {} size {:,} kb'.format(source,os.stat(source).st_size/1024))
                                 logging.info('kitchen_utils::mvcpfilesworker ')
                                 logging.info([dest])
                                 CheckMakeFoldersRoot([dest])
@@ -271,7 +293,8 @@ def removefiles(removefile,root):
                     print 'Attempt Move ' + cl
                     source = os.path.join(root, args[0].strip())
                     dest = os.path.join('working/', args[1].strip())
-                    if os.path.exists(source):
+                    #if os.path.exists(source):
+                    if len(glob.glob(source)) > 0:
                         logging.debug('copy ' + source + ' ' + dest )
                         logging.debug('Remove ' + source)
                         CheckMakeFolders([dest])
@@ -343,8 +366,9 @@ def finalise_boot_recovery(image):
         print os.path.join('working', image),os.path.join('working', image + '.old')
         os.rename(os.path.join('working', image),os.path.join('working', image + '.old'))
         print 'renamed'
-        logging.debug('rkcrc -k working/custom' + image + '.gz '  + image)
-        os.system('rkcrc -k working/custom' + image + '.gz working/'  + image)
+        #logging.debug('rkcrc -k working/custom' + image + '.gz '  + image)
+        #os.system('rkcrc -k working/custom' + image + '.gz working/'  + image)
+        rkcrc('-k', 'working/custom' + image + '.gz', 'working/' + image)
         
         pprint('=')
         pprint(image + ' finalised')

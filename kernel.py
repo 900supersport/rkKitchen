@@ -27,9 +27,12 @@ import logging
 #import bitstring
 
 import rominfo
+import KitchenConfig
 
 from kitchenUI import mymenu, pprint
 from utils import logerror
+from kitchen_utils import rkcrc
+#from rkcrc import rkcrc
 
 #globals
 cluto = 0   # clut offset
@@ -292,7 +295,11 @@ def brandkernel():
                         fw.write(c)
         
         pprint( '... sign the kernel and move branded kernels to working/brand')
-        os.system('rkcrc -k working/kerneltmp.img working/brand/kernel.img')
+##        if KitchenConfig.KitchenConfig.usepycrc:
+##            rkcrc('-k', 'working/kerneltmp.img', 'working/brand/kernel.img')
+##        else:
+##            os.system('rkcrc -k working/kerneltmp.img working/brand/kernel.img')
+        rkcrc('-k', 'working/kerneltmp.img', 'working/brand/kernel.img')
         
         #rename the temp file
         os.rename('working/kerneltmp.img','working/brand/uskernel.img')

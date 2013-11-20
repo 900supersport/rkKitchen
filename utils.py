@@ -150,7 +150,8 @@ def QueryPickleLoad(classvar, filepath):
                 classvar = pickle.load(f)
                 logging.debug('file read')
         else:
-            raise IOError
+            logging.info('utils::QueryPickleLoad Filepath not found :' + filepath)
+            #raise IOError
     except Exception as e:
         logerror('utils::QueryPickleLoad ' , e, 1)
         

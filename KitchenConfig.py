@@ -83,7 +83,12 @@ class KitchenConfig:
                 KitchenConfig.minsystemsize = reader.minsystemsize
                 KitchenConfig.defaultsystemsize = reader.defaultsystemsize
                 KitchenConfig.defaultuserdataG = reader.defaultuserdataG
-                
+
+##                i = os.system('rkcrc')
+##                if i > 256:
+##                    KitchenConfig.usepycrc = 1
+##                else:
+                KitchenConfig.usepycrc = 0
                 
             #copy values into self for pickle useage
             self.editor = KitchenConfig.editor
