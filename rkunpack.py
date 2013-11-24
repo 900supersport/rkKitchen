@@ -169,8 +169,8 @@ def unpack_rkaf(image,buff):
 
             if fpath[:9] == 'parameter':#remove rkcrc signing
                 ioff += 8
-                fsize -= 10 #12
-
+                fsize -= 12 #conside mini that has 3 chars truncated
+ 
             #check for existance of required sub directories and make them
             a = os.path.dirname(fpath)
             if len(a) > 0:
