@@ -91,7 +91,7 @@ def unpack_rkfw(image,buff):
     isize = getint(buff[0x1d:0x1d + 0x4])
     
     if buff[ioff:ioff + 4] != 'BOOT':
-        raise exception('rkunpack::unpack_rkfw no BOOT signature')
+        raise Exception('rkunpack::unpack_rkfw no BOOT signature')
 
     s=image + '-BOOT'
     with open(s,'w') as fw:
@@ -106,7 +106,7 @@ def unpack_rkfw(image,buff):
 
     
     if buff[ioff:ioff + 4] != 'RKAF':
-        raise exception('rkunpack::unpack_rkfw no RKAF signature')
+        raise Exception('rkunpack::unpack_rkfw no RKAF signature')
 
     print '{:08x}-{:08x} {} {} bytes'.format(ioff,ioff+isize-1,image,isize)
     
@@ -119,12 +119,14 @@ def unpack_rkfw(image,buff):
  
     #check and write the -MD5 image
     if (len(buff) - (ioff + isize) != 32):
-        raise exception('rkunpack::unpack_rkfw invalid MD5 length')
-
-    s=image + '-MD5'
-    print "{:08x}-{:08x} {} 32 bytes\n".format(ioff, ioff + isize - 1, s)
-    with open(s,'w') as fw:
-        fw.write(buff[ioff + isize:ioff + isize + 32])
+        print 'unpack_rkfw invalid MD5 length'
+        d = raw_input('press any key to continue')
+        #raise Exception('rkunpack::unpack_rkfw invalid MD5 length')
+    else:
+        s=image + '-MD5'
+        print "{:08x}-{:08x} {} 32 bytes\n".format(ioff, ioff + isize - 1, s)
+        with open(s,'w') as fw:
+            fw.write(buff[ioff + isize:ioff + isize + 32])
 
     
 
@@ -233,7 +235,7 @@ The outputs of this should be congruent to FUN's rkunpack'''
     elif test in ('KRNL','PARM'):
         unpack_krnl(image,buff)
     else:
-        raise exception('rkunpack::rkunpack BAD IMAGE')
+        raise Exception('rkunpack::rkunpack BAD IMAGE')
         
 
 #__main__ for stand alone usage
