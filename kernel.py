@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -79,9 +81,9 @@ def kernel_menu():
                 brandkernel();
         elif choice in ('m','M'):
             
-            print'============================================='
-            print('Exiting')
-            print'============================================='
+            pprint('=')
+            pprint('Exiting')
+            pprint('=')
             
         if choice not in ('m', 'M'):
             kernel_menu()         
@@ -133,16 +135,12 @@ def getkerneldata():
                 
                 cluto = o
                 pl = int(fr.read(1).encode('hex'),16)
-                
-                
                 o = findstring(fr,'logo_RKlogo_data',s) 
                 logging.info('kernel::getkerneldata o:' )
                 logging.info(o )
                 if o>0:
                     fr.seek(o)
-                    
                     datao = o
-                    
                     w=int(fr.read(2).encode('hex'),16)
                     h=int( fr.read(2).encode('hex'),16)
                     ds = w * h + 4       
@@ -295,13 +293,10 @@ def brandkernel():
                         fw.write(c)
         
         pprint( '... sign the kernel and move branded kernels to working/brand')
-##        if KitchenConfig.KitchenConfig.usepycrc:
-##            rkcrc('-k', 'working/kerneltmp.img', 'working/brand/kernel.img')
-##        else:
-##            os.system('rkcrc -k working/kerneltmp.img working/brand/kernel.img')
-        rkcrc('-k', 'working/kerneltmp.img', 'working/brand/kernel.img')
+        os.rename('working/kernel.img','working/brand/kernel.img.orig')
+        rkcrc('-k', 'working/kerneltmp.img', 'working/kernel.img')
         
         #rename the temp file
-        os.rename('working/kerneltmp.img','working/brand/uskernel.img')
+        os.rename('working/kerneltmp.img','working/brand/unsignedkernel.img')
     except Exception as e:
         logerror('kernel::brandkernel ',e,1)                      

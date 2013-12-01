@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -33,7 +35,7 @@ from utils import logerror
 #    except Exception as e:
 #        logerror('KitchenUI::pprint ',e,1)
 
-def pprint(pstring):
+def pprint(pstring,error = 0):
     '''Pretty print the string
     
     Basic pretty print, if pstring = then a line of =
@@ -43,14 +45,19 @@ def pprint(pstring):
         logging.debug('Start pprint: ' + pstring)
         width = KitchenConfig.KitchenConfig.pwidth
         logging.debug('KitchenUI::pprint width: ' + str(width))
+        FAIL = '\033[91m'
+        ENDC = '\033[0m'
+        COL = '\033[0;34;47m'
         
         pstring=pstring.rstrip()    
         lpstring = len(pstring)
         pad = width - 4 - lpstring
         if pstring[:1] == '=' and lpstring == 1:
-            pstring = '='*width
+            pstring = COL + '='*width  + ENDC
         elif pad > 0 :
-            pstring = '| ' + pstring + ' '*pad + ' |'
+            if error == 1:
+                pstring = FAIL + pstring + COL
+            pstring = COL + '| ' + pstring + ' '*pad + ' |' + ENDC
         print pstring
     except Exception as e:
         logerror('KitchenUI::pprint ',e,1) 
@@ -58,7 +65,7 @@ def pprint(pstring):
     logging.debug('end pprint')
     
     
-def header():
+def header(checkvalid = False):
     '''Display a generic header'''
     
     try:
@@ -67,28 +74,39 @@ def header():
         print
         print
         pprint( '=')
-        pprint( 'FreakTab RK ROM Kitchen by 900supersport v2.0.0')
+        pprint( 'FreakTab RK ROM Kitchen by 900supersport v2.0.1')
         pprint( 'Brian Mahoney')
-        pprint( '19 Oct 2013')
+        pprint( '1 Dec 2013')
         pprint( 'www.freaktab.com')
         pprint( '=')
-        pprint( 'Current ROM ' + rominfo.rominfo.romname)
+        romname = rominfo.rominfo.romname
+        pprint( 'Current ROM ' + romname)
         pprint( 'CWD ' + KitchenConfig.KitchenConfig.cwd)
         if kernelimage <> '':
             pprint( 'Kernel image size:' + kernelimage)
         pprint( '=')
+        if romname != 'un-initialised' and checkvalid:
+            ri = rominfo.rominfo
+            invalid, errors = ri.validatemtdblocks()
+            if invalid != 0:
+                pprint( 'Ivalid ROM',1)
+                for l in errors.split('\n'):
+                    pprint(l, 1)
+                pprint(' ')
+                pprint('Press R to attempt repair',1)
+                pprint('=')
     except Exception as e:
         logerror('KitchenUI::header ',e,1)  
     
     logging.debug('End header')
     
     
-def mymenu(menuitems, prompt):
+def mymenu(menuitems, prompt, checkvalid = False):
     '''format and display the supplied menu, prompt and return choice'''
     logging.debug('Start mymenu')
     
     try:
-        header()
+        header(checkvalid)
         for k in sorted(menuitems.keys()):
             if k[1:] == '=':
                 pprint('=')

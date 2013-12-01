@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -39,7 +41,7 @@ from kitchenUI import header, pprint, mymenu
 from utils import CheckMakeFolders, finalisefilesystemimage, mountfileasfilesystem, CheckMakeFoldersRoot, apply_sed, checkfsimage, logerror,zipfolder
 from kitchen_utils import browse,removefiles,deployfiles,movefiles,copyfilesworker
 
-from parameter import parse_parameter,parameter_menu
+from parameter import parse_parameter,parameter_menu, repairparams
 from system import mountsystem, extendBuildprop, finalisesystem, growsystem, shrinksystem, makebusyboxlinks, resizerequired, systemmenu
 
 from boot import bootmenu
@@ -84,7 +86,8 @@ def rkmainmenu():
             
         choice = mymenu(
                     main_menu
-                    ,'Enter selection :')
+                    ,'Enter selection :'
+                    ,checkvalid = True)
         
         if choice in ('1'):
             setworkingROM()
@@ -106,12 +109,12 @@ def rkmainmenu():
             parameter_menu()
         elif choice in ('f','F'):
             flash_menu()
-        #elif choice in ('g','G'):
-        #    graphics_menu()
+        elif choice in ('r','R'):
+            repairparams()
         elif choice in ('k','K'):
             kernel_menu()
         elif choice in ('W','w'):
-            browse('working/')
+            browse('')
         elif choice in ('x','X'):
             pprint('=')
             pprint('Exiting')
@@ -124,9 +127,9 @@ def rkmainmenu():
         logerror('rkmainmenu::menu ',e,1)
         
 
-
 def wipeworkspace():
     cleanworkspace()
+    
     
 def cleanworkspace():
     try:
@@ -147,11 +150,12 @@ def cleanworkspace():
         if cont in ('Y', 'y'):
             zipfolder('read','ReadImages.zip')
             zipfolder('localdeploy','localdeploy.zip')
-
             os.system('sudo rm -rf working')
             shutil.rmtree('localdeploy')
             shutil.rmtree('sources')
             shutil.rmtree('read')
+         
+        rominfo.rominfo.romname = 'un-initialised'   
     except Exception as e:
         logerror('rkmainmenu::recursive_zip ',e,1)
         
@@ -180,8 +184,6 @@ def makeROMkits():
         tgt = os.path.join(dst,rominfo.rominfo.romname.strip() + '_' + src)
         src = os.path.join(dst,src)
         os.system('mv ' + src + ' ' + tgt)
-                
-    
     except Exception as e:
         logerror('rkmainmenu::makeROMkits ',e,1)
 
@@ -226,7 +228,6 @@ def promptLocalDeploy():
     except Exception as e:
         logerror('kitchen_utils::promptLocalDeploy ',e,1)
         
-                 
         
 def getROMFile(): 
     '''prompt for a rom image and move it into the sources folder
@@ -266,19 +267,33 @@ def unpackROM():
             image = "'" + image + "'"
         logging.debug('rkunpack ' + image)
         rkunpack(image)
-        #os.system( 'rkunpack ' + image )
-        os.chdir(tcwd) 
-    except Exception as e:
+        #now fix bad parameter file if ends (use rather than (user)
+        testcorrectparameter()
         
+        #os.system( 'rkunpack ' + image )
+        os.chdir(tcwd)
+        
+    except Exception as e:
+        os.chdir(tcwd)
+              
         logerror('rkmainmenu::getROMFile rkunpack fails ',e,0 )
         #now if this does not work try rkunpack
         try:
             os.system( 'unpack_all.sh ' 
-                + os.path.join(KitchenConfig.KitchenConfig.SourceROMLoc(), filename) + ' ' 
+                + os.path.join(KitchenConfig.KitchenConfig.SourceROMLoc(), rominfo.rominfo.romimgfilename) + ' ' 
                 + KitchenConfig.KitchenConfig.SourceROMUnpackedLoc())
         except Exception as e:
             logerror('rkmainmenu::unpackROM unpack_all.sh',e,1)
-    
+ 
+ 
+def testcorrectparameter():
+    with open('parameter','r') as f:
+        buf = f.read()
+        
+    if buf[-4:] == '(use':
+        with open('parameter','w') as f:
+            f.write(buf + 'r)')
+             
     
 def copyImages():
     '''copy the unpacked image files to the working folder
@@ -294,8 +309,12 @@ def copyImages():
         shutil.copy(
             os.path.join(KitchenConfig.KitchenConfig.SourceROMUnpackedLoc(),'parameter')
             ,'working')
+
+        rominfo.rominfo.originalsystemsize = os.stat('working/system.img').st_size
+        
     except Exception as e:
         logerror('rkmainmenu::copyImages ',e,1)
+
 
 def saveromdata():
     '''save the rom data to the rominfo
@@ -340,10 +359,6 @@ def cleanroot():
 
         movefiles(os.path.join(kc.KitchenPath, 'processcontrol/movepreinstall'))
         deployfiles(os.path.join(kc.KitchenPath, 'processcontrol/deploy'),'working/mntsystem',0)
-        
-        #os.system('sudo cp working/mntsystem/xbin/su working/mntsystem/bin/')
-        #os.system('sudo chmod 6755 working/mntsystem/bin/su')
-        #os.system('sudo ls -l working/mntsystem/bin/su')    
         
         makebusyboxlinks(os.path.join(kc.KitchenPath, 'processcontrol/makelinks'))
         CheckMakeFoldersRoot(['working/mntsystem/etc/init.d'])

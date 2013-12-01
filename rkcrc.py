@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -147,6 +149,7 @@ def hexencode(i):
         hsize = hsize[:-2]    
 
     return prefix
+    
 
 def rkcrc(flags,infile,outfile):
     '''rkcrc [-k|-p] source destination (output a signed copy of the image based on the flag)
@@ -192,7 +195,6 @@ original image
         fw.write(prefix + inbuff + hexencode(crc))
 
             
-
 if __name__ == "__main__":
     #parse aregs
     #optional k or p
@@ -213,14 +215,3 @@ if __name__ == "__main__":
         sys.exit(rkcrc('',args.source,args.destination))
     
 
-    #if False: # not testing?
-    #sys.exit(mainf())
-    #else:
-    #    # Test/sample invocations (can test multiple in one run)
-    #    
-    #    #mainf('uskernel.img','kernel.img')
-    #    #mainf('-p','uskernel.img','kernelp.img')
-    #    rkcrc('-k','uskernel.img','kernelk.img')
-    #    #mainf('-k','brian','brian.img')
-
-    #    #print '7c1c79de'

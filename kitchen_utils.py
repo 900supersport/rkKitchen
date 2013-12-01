@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -130,6 +132,7 @@ def copyfilesworker(movefilename,sourceroot,asroot,verbose=0):
 def movefilesworker(movefilename,sourceroot,asroot = 1,verbose=0 ):
     mvcpfilesworker(movefilename,sourceroot,'mv',asroot,verbose)
 
+
 def mvcpfilesworker(movefilename,sourceroot,op,asroot,verbose=0):
     try:
         serr=''
@@ -209,7 +212,6 @@ def movefiles(movefilename):
     except Exception as e:
         logerror('kitchen_utils::movefiles ',e,1)
 
-
     
 def deployfiles(deployfilename,deploydest,openforreview):
     '''deploy files 
@@ -237,8 +239,16 @@ def deployfiles(deployfilename,deploydest,openforreview):
                     try:
                         tgt = os.path.join(sourceroot, args[1].strip())
                         logging.info('kitchen_utils::deployfiles attempt deploy ' + tgt)
-                        if os.path.exists(tgt):
-                            copys = 'sudo cp ' + tgt + ' ' + os.path.join(deploydest, args[2].strip())
+                        #if os.path.exists(tgt):
+                        if len(glob.glob(tgt)) > 0:
+                            if tgt.find('*') > 0:
+                                flags = '-r '
+                            else:
+                                flags = ''
+
+                            dest = os.path.join(deploydest, args[2].strip())
+                            CheckMakeFoldersRoot([dest])
+                            copys = 'sudo cp ' + flags + tgt + ' ' + dest
                             chmods = 'sudo chmod '  + args[3][3:] + ' ' + os.path.join(deploydest, args[2].strip(), args[1].strip())
                             logging.debug('copy :' + copys)
                             logging.debug('chmod :' + chmods)   
@@ -375,6 +385,7 @@ def finalise_boot_recovery(image):
         pprint('=')  
     except Exception as e:
         logerror('kitchen_utils::finalise_boot_recovery ',e,1)
+
 
 def touch_and_zip_boot_recovery(folder,image): 
     '''touch all files in the image setting the data to 1-1-1970

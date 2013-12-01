@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -98,12 +100,12 @@ def addpreinstall(openforreview):
         spath = os.path.join(KitchenConfig.KitchenConfig.KitchenPath, 'processcontrol/addpreinstall')
         with open(spath,'r') as sf:
             query_add(path, 'service preinstall', sf.read())
-
-                    
+                   
         if openforreview ==1:            
             os.system('sudo ' + KitchenConfig.KitchenConfig.editor + ' ' + path)
     except Exception as e:
         logerror('boot::addinitd_support ',e,1)
+
         
 def addinitd_support(openforreview):
     '''query add init.d support'''
@@ -113,7 +115,6 @@ def addinitd_support(openforreview):
         spath = os.path.join(KitchenConfig.KitchenConfig.KitchenPath, 'processcontrol/addinitdsupport')
         with open(spath,'r') as sf:
             query_add(path, 'service runparts', sf.read())
-
                     
         if openforreview ==1:            
             os.system('sudo ' + KitchenConfig.KitchenConfig.editor + ' ' + path)
@@ -157,32 +158,6 @@ def finalise_boot():
         finalise_boot_recovery('boot.img')
     except Exception as e:
         logerror('boot::finalise_boot ' ,e,1)
-    
-    
-#def initrc_mount_system_rw(openforreview):    
-#    '''update init.rc to mount system rw'''
-#    try:
-#        sedpath = os.path.join(KitchenConfig.KitchenConfig.KitchenPath, 'processcontrol/init.rc_systemrw')
-#        apply_sed('sedpath
-#            ,'working/boot/init.rc'
-#            ,openforreview)
-#    except Exception as e:
-#        logerror('boot::initrc_mount_system_rw ',e,1)
-               
-   
-#def addinitd_support(openforreview):
-#    '''query add init.d support'''
-#    try:
-#        path = 'working/boot/init.rc'
-#        spath = os.path.expanduser('~/pykitchen/processcontrol/addinitdsupport')
-#        with open(spath,'r') as sf:
-#            query_add(path, 'service runparts', sf.read())
-
-                    
-#        if openforreview ==1:            
-#            os.system('sudo gedit ' + path)
-#    except Exception as e:
-#        logerror('boot::addinitd_support ' ,e,1)  
 
         
 def brand_boot(openforreview):

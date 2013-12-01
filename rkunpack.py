@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -47,7 +49,6 @@
 # * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # */
 #############################################################################
-
 import argparse
 import sys
 import os
@@ -62,6 +63,7 @@ def getstring(buff):
         c=buff[i]
 
     return s
+
 
 def getint(buff):
     #print len(buff)
@@ -127,7 +129,6 @@ def unpack_rkfw(image,buff):
         print "{:08x}-{:08x} {} 32 bytes\n".format(ioff, ioff + isize - 1, s)
         with open(s,'w') as fw:
             fw.write(buff[ioff + isize:ioff + isize + 32])
-
     
 
 def unpack_rkaf(image,buff):
@@ -247,6 +248,4 @@ if __name__ == "__main__":
 
     rkunpack(args.image)
     
-
-
 

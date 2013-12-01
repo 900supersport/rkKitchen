@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -26,6 +28,7 @@ import pickle
 import logging
 import traceback
 import zipfile
+import zlib
 
 #    try:
 #        
@@ -39,21 +42,25 @@ def zipfolder(sourcefolder,zipfilename):
     if there are no files to be archived then the zip will be removed
     '''
     try:
-        if os.path.isfile(zipfilename):
-            mode = 'a'
-        else:
-            mode = 'w'
-            
-        zf = zipfile.ZipFile(zipfilename,mode)
-        hasdata = recursive_zip(zf,sourcefolder)
-        zf.close()
-        if hasdata == 0 and mode =='w' :
-            os.system(zipfilename)
+        if os.path.isdir(sourcefolder):
+
+            if os.path.isfile(zipfilename):
+                mode = 'a'
+            else:
+                mode = 'w'
+                
+            zf = zipfile.ZipFile(zipfilename,mode,compression=zipfile.ZIP_DEFLATED)
+            hasdata = recursive_zip(zf,sourcefolder)
+            zf.close()
+            if hasdata == 0 and mode =='w' :
+                os.system('rm ' + zipfilename)
 
     except Exception as e:
         logerror('utils::zipfolder ',e,1)
 
 def recursive_zip(zipf, directory, folder = ""):
+    '''adds directory and all sub directories to the zipfile zipf
+'''
     try:
         append = 0
         for item in os.listdir(directory):
@@ -72,6 +79,7 @@ def recursive_zip(zipf, directory, folder = ""):
 def GetCWD():
     return os.getcwd()
 
+
 def CheckMakeFolders(folderlist):
     '''check the existance of and make any missing folders in the input list
     '''
@@ -81,8 +89,7 @@ def CheckMakeFolders(folderlist):
     except Exception as e:
         logerror('utils::CheckMakeFolders ' , e, 1)
         
-
-
+        
 def CheckMakeFoldersRoot(folderlist):
     '''check the existance of and make any missing folders as root in the input list
     '''
@@ -92,8 +99,7 @@ def CheckMakeFoldersRoot(folderlist):
     except Exception as e:
         logerror('utils::CheckMakeFoldersRoot ' , e, 1)
         
-        
-        
+                
 def CheckMakeFolder(dirpath):
     '''Check for existance of the folder and create
     
@@ -106,7 +112,6 @@ def CheckMakeFolder(dirpath):
         logerror('utils::CheckMakeFolder ' , e, 1)
                 
         
-
 def CheckMakeFolderW(dirpath,asroot):
     '''Check for existance of the folder and create as root if specified
     
@@ -135,7 +140,6 @@ def CheckMakeFolderW(dirpath,asroot):
         logerror('utils::CheckMakeFolderW ' , e, 1)
          
 
-
 def QueryPickleLoad(classvar, filepath):
     '''load a class from a pickle file
     '''
@@ -158,6 +162,7 @@ def QueryPickleLoad(classvar, filepath):
     finally:
         logging.debug('End QueryPickleLoad')
         return classvar
+ 
         
 def PickleIt(classvar, filepath):
     '''Pickle a class to a file
@@ -190,7 +195,6 @@ def apply_sed(sedfilepath,applytopath,openforreview):
         logerror('utils::apply_sed ' , e, 1)
             
 
-
 def umount(mountpoint):
     '''unmount the specified filesystem'''
     try:
@@ -198,8 +202,7 @@ def umount(mountpoint):
         os.system(systemstring)
     except Exception as e:
         logerror('utils::umount ' , e, 1)
-         
-            
+                     
 
 def finalisefilesystemimage(mount, image):
     '''unmount and check a mounted filebased filesystem'''
@@ -218,10 +221,7 @@ def mountfileasfilesystem(mountfile, filesystemtype, mountpoint):
         systemstring = 'sudo mount -t ' + filesystemtype + ' -o loop ' + mountfile + ' ' + mountpoint
         os.system(systemstring)
     except Exception as e:
-        
         logerror('utils::mountfileasfilesystem ' , e, 1)
-              
-        
     logging.debug('End mountfileasfilesystem')
     
     
@@ -229,7 +229,6 @@ def checkfsimage(image):
     '''call e2fscheck on a file based filesystem'''   
     os.system('sudo e2fsck -y -v ' + image)                 
     
-
 
 def logerror(errortext, myerror, raiseit):
     try:

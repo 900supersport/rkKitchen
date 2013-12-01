@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -50,6 +52,7 @@ class KitchenConfig:
     minsystemsize = 0
     defaultsystemsize = 576716800
     defaultuserdataG = 4
+    systemresizebehaviour = 'FIT SYSTEM TO PARAMETER'
     
     def __init__(self):
         '''initialise Kithchen Config
@@ -83,11 +86,8 @@ class KitchenConfig:
                 KitchenConfig.minsystemsize = reader.minsystemsize
                 KitchenConfig.defaultsystemsize = reader.defaultsystemsize
                 KitchenConfig.defaultuserdataG = reader.defaultuserdataG
+                KitchenConfig.systemresizebehaviour = reader.systemresizebehaviour
 
-##                i = os.system('rkcrc')
-##                if i > 256:
-##                    KitchenConfig.usepycrc = 1
-##                else:
                 KitchenConfig.usepycrc = 0
                 
             #copy values into self for pickle useage
@@ -98,6 +98,7 @@ class KitchenConfig:
             self.minsystemsize = KitchenConfig.minsystemsize 
             self.defaultsystemsize = KitchenConfig.defaultsystemsize
             self.defaultuserdataG = KitchenConfig.defaultuserdataG
+            self.systemresizebehaviour = KitchenConfig.systemresizebehaviour
             
         except Exception as e:
             logging.error('KitchenConfig::__init__ ' )
@@ -126,7 +127,12 @@ class KitchenConfig:
         '''List of parameter sizes
     '''
         return [2,4,6,8]
-        
+
+
+    @staticmethod
+    def systemresizebehaviours():
+        return ['FIT SYSTEM TO PARAMETER','FIT PARAMETER TO SYSTEM']
+    
     
     @staticmethod    
     def ROMInfoLoc():

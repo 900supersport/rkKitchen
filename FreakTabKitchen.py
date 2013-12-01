@@ -4,6 +4,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ###########################################################################
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -51,8 +53,7 @@ The actual Kitchen Config and if present the rominfo in the current workspace wi
     if GetCWD() =='/home/brian/rkKitchen':
         os.chdir('/home/brian/Desktop/ROMS/cube/u30gt2/2.06_official')
         print GetCWD
-        
-        
+               
     logmode = logging.INFO
     writemode = 'a'
     filename = 'kitchen.log'
@@ -70,7 +71,6 @@ The actual Kitchen Config and if present the rominfo in the current workspace wi
                             datefmt='%H:%M:%S',
                             level=logmode)
                       
-    
     try:
         logging.info('====================================================================================')
         logging.info('Start FreakKitchen')
@@ -86,7 +86,6 @@ The actual Kitchen Config and if present the rominfo in the current workspace wi
 
         CheckMakeFolders(kc.KitchenFolders())
 
-
         rkmainmenu()
         kc.Pickle()
         ri.Pickle()
@@ -100,5 +99,7 @@ The actual Kitchen Config and if present the rominfo in the current workspace wi
         pprint ('=')
         pprint ('http://www.freaktab.com/showthread.php?8042-FreakTab-RK-ROM-Kitchen-by-900supersport-v2')
         print 
+
+
 StartKitchen()
 

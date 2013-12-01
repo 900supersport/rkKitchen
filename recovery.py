@@ -1,9 +1,11 @@
 #!/usr/bin/python
-#
+############################################################################
 #   
 #   FreakTabKitchen www.freaktab.com
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
+#
+#   <version>2.0.1</version>
 #
 ############################################################################
 #

@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -21,12 +23,17 @@
 #   along with FreakTabKitchen.  If not, see <http://www.gnu.org/licenses/>.
 #
 ############################################################################
+#
+#   TODO
+#   Make a decision about the location of rominfo and parameter code, currently 
+#   its spread between both locations
+###########################################################################
 
 import os
 import logging
-import KitchenConfig
 import time
 
+import KitchenConfig
 from utils import  QueryPickleLoad, PickleIt, logerror
 
 #    try:
@@ -66,11 +73,16 @@ class rominfo:
     kpanic = ''
     system = ''
     user = ''
-    
+    factory = ''
+    originalsystemsize = 0
     parameterfile = ''
+    mtdblocks = []
+
+    ##these vars not pickled
+    errorblocks = []
     
     def __init__(self, rominfopath):
-        '''Rom info
+        '''ROM info
 
         
         '''
@@ -120,7 +132,12 @@ class rominfo:
                 rominfo.kpanic = reader.kpanic
                 rominfo.system = reader.system
                 rominfo.user = reader.user
+                rominfo.factory = reader.factory
                 rominfo.parameterfile = reader.parameterfile
+                rominfo.originalsystemsize = reader.originalsystemsize
+                rominfo.mtdblocks = reader.mtdblocks
+                if len(rominfo.mtdblocks) == 0 and len(rominfo.CMDLINE) > 0:
+                    rominfo.parsemtdblocks(rominfo.CMDLINE,1)
 
             #copy values into self for pickle useage
             self.romname = rominfo.romname
@@ -150,7 +167,11 @@ class rominfo:
             self.kpanic = rominfo.kpanic
             self.system = rominfo.system
             self.user = rominfo.user
+            self.factory = rominfo.factory
             self.parameterfile = rominfo.parameterfile
+            self.originalsystemsize = rominfo.originalsystemsize
+            self.mtdblocks = rominfo.mtdblocks
+            
         except Exception as e:
             logerror('rominfo::__init__ ' ,e ,1)
 
@@ -159,10 +180,13 @@ class rominfo:
     def storeparameterfile(filename,depth = 0):
     
         try:
+            logging.debug('rominfo::storeparameterfile pre store\n============================\n' + rominfo.parameterfile)
+            logging.debug('rominfo::storeparameterfile pre store\n============================\n')
             with open(filename) as f:
                 rominfo.parameterfile = f.read()
                     #read file
-            
+            logging.debug('rominfo::storeparameterfile as read\n============================\n' + rominfo.parameterfile)
+                 
             with open(filename) as f:
                 myfile = f.readlines()
             
@@ -173,63 +197,101 @@ class rominfo:
                 value = line[cpos+1:].strip()
                 rominfo.setparm(key, value)
                 if key == 'CMDLINE':
+                    if value[-4:] == '(use':
+                        value += 'r)'
                     cmdlinedata = value.split(':')
 
-            #identify image data
-            for i,v in enumerate(cmdlinedata):
-                logging.info(i)
-                logging.info(v)
-                if v.find('(cache)') > 0 :
-                    idat = v 
-                    break
-
-            #parse image data
-            for i,v in enumerate(idat.split(',')):
-                tpos = v.find('@')
-                bpos = v.find('(')
-                size = v[:tpos]
-                offset = v[tpos+1:bpos]
-                image = v[bpos+1:].strip(')')
-                rominfo.setimage(image,offset,size)
+            rominfo.parsemtdblocks(rominfo.CMDLINE)
         
             rominfo.Pickle()
 
             if depth==0:
                 #write additional parameter files based on this one
+                logging.info('rominfo::storeparameterfile write all parameter files') 
+                writecount = 0
                 kc = KitchenConfig.KitchenConfig
                 for s in kc.parametersizes():
-                    rominfo.writeparameterfile(s)
+                    logging.info('rominfo::storeparameterfile write parameter file {}'.format(s)) 
+                    writecount += rominfo.writeparameterfile(s)
 
-                os.system('rm working/parameter')
-                os.system('cp working/parameter' + str(kc.defaultuserdataG) + ' working/parameter')
-                time.sleep(2)
-                rominfo.storeparameterfile('working/parameter',1)
+                if writecount > 0:
+                    os.system('rm working/parameter')
+                    os.system('cp working/parameter' + str(kc.defaultuserdataG) + ' working/parameter')
+                    time.sleep(2)
+                    rominfo.storeparameterfile('working/parameter',1)
 
             #now update based on the p file
         except Exception as e:
             logerror('rominfo::storeparameterfile ' ,e ,1)
 
+
+    @staticmethod
+    def parsemtdblocks(CMDLINE,parsemtdonly = 0):
+        '''parse image data
+    '''
+        rominfo.mtdblocks = []
+        cmdlinedata = CMDLINE.split(':')
+        for i,v in enumerate(cmdlinedata):
+            if v.find('(cache)') > 0 :
+                idat = v
+                break
+        
+        ##parse image data
+        for i,v in enumerate(idat.split(',')):
+            tpos = v.find('@')
+            bpos = v.find('(')
+            size = v[:tpos]
+            offset = v[tpos+1:bpos]
+            image = v[bpos+1:].strip(')')
+            if parsemtdonly != 1:
+                rominfo.setimage(image,offset,size)
+            rominfo.mtdblocks.append(image)
+    
+
     @staticmethod
     def applyparameterchanges():
         '''Update the persisted parameter file with the current values and regenerate system.img and parameter files
 
-    '''
-        f = rominfo.parameterfile
-        kpendloc = f.find(',', f.find('(kpanic)'))+1
-        sysendloc = f.find(',', f.find('(system)'))+1
-        userendloc =  f.find('(user)')+6
+'''
+        try:
+            logging.info('rominfo::applyparameterchanges start current parameter')
+            f = rominfo.parameterfile
 
-        npf = f[:kpendloc]
-        npf = npf + rominfo.submtdsize(f[kpendloc:sysendloc],rominfo.system.size)
-        npf = npf + rominfo.submtdoffset(f[sysendloc:userendloc],rominfo.user.offset)
-        npf = npf + f[userendloc:]
+            logging.info('\n\n' + f + '\n\n')
 
-        rominfo.parameterfile = npf
+            #get all the mtdblocks here 
+            kpendloc = f.find(',', f.find('(kpanic)'))+1
+            sysendloc = f.find(',', f.find('(system)'))+1
+            userendloc =  f.find('(user)')+6
 
-        with open('working/parameter','w') as mp:
-            mp.write(npf)
+            npf = f[:kpendloc]
+            npf = npf + rominfo.submtdsize(f[kpendloc:sysendloc],rominfo.system.size)
+            npf = npf + rominfo.submtdoffset(f[sysendloc:userendloc],rominfo.user.offset)
+            npf = npf + f[userendloc:]
 
-        rominfo.storeparameterfile('working/parameter')
+            rominfo.parameterfile = npf
+
+            logging.info('rominfo::applyparameterchanges update parameter')
+            f = rominfo.parameterfile
+
+            logging.info('\n\n' + f + '\n\n')                    
+
+            logging.info('rominfo::applyparameterchanges writing parameter file')
+            rominfo.writeparameter(npf)
+
+            logging.info('rominfo::applyparameterchanges storeparameterfile')
+            #rominfo.storeparameterfile('working/parameter')
+            logging.info('rominfo::applyparameterchanges end')
+        except Exception as e:
+            logerror('rominfo::applyparameterchanges ' ,e ,1)
+
+
+    @staticmethod
+    def writeparameter(pfile,pfilepath ='working/parameter'):
+        with open(pfilepath,'w') as mp:
+            mp.write(pfile)
+        rominfo.storeparameterfile(pfilepath)
+
 
     @staticmethod
     def newoffset(offset,growth):
@@ -237,61 +299,75 @@ class rominfo:
 '''
         return hex((long(offset,16) * 512 + growth) / 512)[:-1]
 
+
+    @staticmethod
+    def ishex(testsring):
+        try:
+            dummy = long(testsring,16)
+            retval = True
+        except:
+            retval = False
+
+        return retval
+
+
     @staticmethod
     def writeparameterfile(userdatasize):
         '''write a parameter file with the specified userdata size
 '''
         try:
+            logging.info('rominfo::writeparameterfile userdatasize :{}'.format(userdatasize))
+            retval = 0
             csh = rominfo.userdata.size
-            #print csh
-            currentsize = long(csh,16)* 512 
-            udsb = long(userdatasize) * 1024 * 1024 * 1024
-            growth = udsb - currentsize
-            #print growth
-            f = rominfo.parameterfile
-            if growth == 0:
-                npf = f
-            else:
-                chendloc = f.find(',', f.find('(cache)'))+1
-                udendloc = f.find(',', f.find('(userdata)'))+1
-                kpendloc = f.find(',', f.find('(kpanic)'))+1
-                sysendloc = f.find(',', f.find('(system)'))+1
-                userendloc =  f.find('(user)')+6
+            logging.info('rominfo::writeparameterfile csh,ishex(csh) : {}: {}'.format(csh,rominfo.ishex(csh)))
+            
+            if rominfo.ishex(csh):
+                currentsize = long(csh,16)* 512 
+                udsb = long(userdatasize) * 1024 * 1024 * 1024
+                growth = udsb - currentsize
+                #print growth
+                f = rominfo.parameterfile
+                if growth == 0:
+                    npf = f
+                else:
+                    chendloc = f.find(',', f.find('(cache)'))+1
+                    udendloc = f.find(',', f.find('(userdata)'))+1
+                    kpendloc = f.find(',', f.find('(kpanic)'))+1
+                    sysendloc = f.find(',', f.find('(system)'))+1
+                    userendloc =  f.find('(user)')+6
 
-                uds = f[chendloc:udendloc]
-                kps = f[udendloc:kpendloc]
-                syss = f[kpendloc:sysendloc]
-                us = f[sysendloc:userendloc]
-                rest = f[userendloc:]
+                    uds = f[chendloc:udendloc]
+                    kps = f[udendloc:kpendloc]
+                    syss = f[kpendloc:sysendloc]
+                    us = f[sysendloc:userendloc]
+                    rest = f[userendloc:]
 
-                nudsh = hex(udsb/512)[:-1]
-                uds = rominfo.submtdsize(uds,nudsh)
+                    nudsh = hex(udsb/512)[:-1]
+                    uds = rominfo.submtdsize(uds,nudsh)
 
-                nkpo = rominfo.newoffset(rominfo.kpanic.offset,growth) 
-                nsyso = rominfo.newoffset(rominfo.system.offset,growth)
-                nuo = rominfo.newoffset(rominfo.user.offset,growth)
-                
-                kps = rominfo.submtdoffset(kps,nkpo)
-                syss = rominfo.submtdoffset(syss,nsyso)
-                us = rominfo.submtdoffset(us,nuo)
+                    nkpo = rominfo.newoffset(rominfo.kpanic.offset,growth) 
+                    nsyso = rominfo.newoffset(rominfo.system.offset,growth)
+                    nuo = rominfo.newoffset(rominfo.user.offset,growth)
+                    
+                    kps = rominfo.submtdoffset(kps,nkpo)
+                    syss = rominfo.submtdoffset(syss,nsyso)
+                    us = rominfo.submtdoffset(us,nuo)
 
-                npf = f[:chendloc]
-                npf = npf + uds
-                npf = npf + kps
-                npf = npf + syss
-                npf = npf + us
-                npf = npf + rest
-
-                #0x00400000@0x00088000(userdata)
-                #0x00002000@0x00488000(kpanic) 
-                #0x00114000@0x0048A000(system) 
-                #-@0x0059E000(user) 
-                
-            with open('working/parameter' + str(userdatasize),'w') as f:
-                f.write(npf)
+                    npf = f[:chendloc]
+                    npf = npf + uds
+                    npf = npf + kps
+                    npf = npf + syss
+                    npf = npf + us
+                    npf = npf + rest
+                    
+                with open('working/parameter' + str(userdatasize),'w') as f:
+                    f.write(npf)
+                retval = 1
         except Exception as e:
             logerror('rominfo::writeparameterfile ' ,e ,1)
-            
+        finally:
+            return retval
+
 
     @staticmethod
     def submtdsize(mtdstring,size):
@@ -300,21 +376,20 @@ class rominfo:
         #strip 0x
         size = size[2:].upper()
         mtdsize,mtdoffset = mtdstring.split('@')
-        return mtdsize[:-len(size)] + size + '@' + mtdoffset
+        #force the size component to correct length
+        return '0x00000000'[:-len(size)] + size + '@' + mtdoffset
+
 
     @staticmethod
     def submtdoffset(mtdstring,offset):
         '''substitues size in the mtdstring supplied
     '''
-        #strip 0x
         offset = offset[2:].upper()
-        #offset = offset.upper
         mtdsize,mtdoffset = mtdstring.split('@')
         loc = mtdoffset.find('(')
-        newoffset = mtdoffset[:loc][:-len(offset)] + offset + mtdoffset[loc:]
-        
-        return mtdsize + '@'  + newoffset
-
+        offset = '0x00000000'[:-len(offset)] + offset
+        return mtdsize + '@' + offset + mtdoffset[loc:]
+     
                                 
     @staticmethod
     def setROMimgFilename(ROMimgFilename):
@@ -323,6 +398,7 @@ class rominfo:
         rominfo.romimgfilename = ROMimgFilename
         rominfo.romname = ROMimgFilename[:ROMimgFilename.rfind('.')]
     
+
     @staticmethod    
     def Pickle():
         '''static pick this class
@@ -332,6 +408,7 @@ class rominfo:
         logging.debug('rominfo.romname :' + rominfo.romname)
         PickleIt(reader, rominfo.rominfofilepath)
         
+
     @staticmethod     
     def tostring():
         '''static to string
@@ -386,6 +463,7 @@ class rominfo:
         logging.debug('rominfo.tostring ' + rval)
         return rval
     
+
     @staticmethod
     def setimage(image,offset,size):
         '''assign to correct property'''
@@ -412,6 +490,9 @@ class rominfo:
             rominfo.system = imageflashinfo(image,offset,size)
         elif image == 'user':
             rominfo.user = imageflashinfo(image,offset,size)
+        elif image == 'factory':
+            rominfo.factory = imageflashinfo(image,offset,size)
+
  
     @staticmethod
     def setparm(parm,val):
@@ -441,14 +522,12 @@ class rominfo:
         elif parm == 'MANUFACTURER':
             rominfo.MANUFACTURER = val
             
+
     @staticmethod
     def systemsizeGrow():
     
         kc = KitchenConfig.KitchenConfig
         rv = max(int(rominfo.system.size,16) * 512,kc.maxsystemsize)
-        #11:51:52,624 root INFO rominfo::systemsizeGrow current systemsize 576716800
-        #11:51:52,625 root INFO rominfo::systemsizeGrow current maxsystemsize 0
-        #11:51:52,625 root INFO rominfo::systemsizeGrow current rv 576716800
         logging.info('rominfo::systemsizeGrow current systemsize ' +str(int(rominfo.system.size,16) * 512))
         logging.info('rominfo::systemsizeGrow current maxsystemsize ' +str(kc.maxsystemsize))
         logging.info('rominfo::systemsizeGrow current rv ' +str(rv))
@@ -456,17 +535,87 @@ class rominfo:
             rv = kc.defaultsystemsize
         return rv
                 
+
     @staticmethod
     def systemsizeShrink():
-    
+        from parameter import sizetoparamsize
         kc = KitchenConfig.KitchenConfig
-        rv = max(int(rominfo.system.size,16) * 512,kc.minsystemsize)
+        if kc.systemresizebehaviour == 'FIT SYSTEM TO PARAMETER':     
+            rv = max(int(rominfo.system.size,16) * 512,kc.minsystemsize)
+        else:
+            rv = max(sizetoparamsize(originalsystemsize+1),kc.minsystemsize)
         logging.info('rominfo::systemsizeShrink current systemsize ' +str(int(rominfo.system.size,16) * 512))
         logging.info('rominfo::systemsizeShrink current minsystemsize ' +str(kc.minsystemsize))
         logging.info('rominfo::systemsizeShrink current rv ' +str(rv))
         if rv ==0:
             rv = kc.defaultsystemsize
         return rv
+
+
+    @staticmethod
+    def validatemtdblocks():
+        try:
+            ri = rominfo
+
+            mtdblocks = ri.mtdblocks
+            rollingoffset = 0
+            invalid = 0
+            errors = ''
+
+            for i,v in enumerate(mtdblocks):
+                offset = 0
+                size = 0
+                imgsize = 0
+                if v == 'use':
+                    v = 'user' 
+                logging.info(v)
+                size, offset, imgsize = ri.getmtddata(v,ri)
+                if size != '-':
+                    ioffset = int(offset,16)
+                    isize= int(size,16)
+                    if ioffset < rollingoffset:
+                        invalid = 1
+                        errors += 'invalid offset {}\n'.format(v)
+                        rominfo.errorblocks.append([v,'offset'])
+                    rollingoffset += isize
+                    isize =isize * 512
+                    if imgsize > isize:
+                        invalid = 1
+                        errors += 'invalid {}.img, image larger than allocated space\n'.format(v)     
+                        rominfo.errorblocks.append([v,'size'])
+
+        except Exception as e:
+            logerror('rominfo::validatemtdblocks ' ,e ,1)
+        return invalid, errors
+
+
+    @staticmethod
+    def getmtddata(image,ri):
+        #print image
+        if image == 'misc':
+            worker = ri.misc
+        if image == 'kernel':
+            worker = ri.kernel
+        if image == 'boot':
+            worker = ri.boot
+        if image == 'recovery':
+            worker = ri.recovery
+        if image == 'backup':
+            worker = ri.backup
+        if image == 'cache':
+            worker = ri.cache
+        if image == 'userdata':
+            worker = ri.userdata
+        if image == 'kpanic':
+            worker = ri.kpanic
+        if image == 'system':
+            worker = ri.system
+        if image == 'user':
+            worker = ri.user
+        if image == 'factory':
+            worker = ri.factory        
+        return worker.size, worker.offset, worker.imagesize()    
+
     
 class imageflashinfo:
     '''represent an rk mnt point 
@@ -486,4 +635,9 @@ class imageflashinfo:
         '''return offset and size as a string for use by rkflashtool'''
         return str(self.offset) + ' ' + str(self.size)
 
-
+    def imagesize(self):
+        retval = 0
+        if self.image in ('kernel', 'boot', 'recovery', 'system'):
+            retval = os.stat(os.path.join('working/',self.image + '.img')).st_size
+        return retval
+        

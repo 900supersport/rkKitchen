@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -29,7 +31,7 @@ import logging
 import rominfo
 from kitchenUI import mymenu
 from utils import logerror
-from parameter import parse_parameter, parse_parameter_by_file
+from parameter import parse_parameter, parse_parameter_by_file, repairparams
 
 #    try:
 #        
@@ -60,7 +62,7 @@ def flash_menu():
             ('z=', '=')
             ])
             
-        choice = mymenu(my_menu,'Enter selection :')
+        choice = mymenu(my_menu,'Enter selection :',checkvalid = True)
         
         if choice in ('1'):
             flash_singleimage('working/misc.img',ri.misc.flashdata())
@@ -82,6 +84,8 @@ def flash_menu():
             flash_reboot()
         elif choice in ('Pp'):
             pullROM()
+        elif choice in('Rr'):
+            repairparams()
         else:
             pass
         

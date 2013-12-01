@@ -5,6 +5,8 @@
 #
 #   Copyright 2013 Brian Mahoney brian@mahoneybrian.wanadoo.co.uk
 #
+#   <version>2.0.1</version>
+#
 ############################################################################
 #
 #   FreakTabKitchen is free software: you can redistribute it and/or modify
@@ -137,7 +139,7 @@ def shrinksystem():
     
     try:
         c=rominfo.rominfo.systemsizeShrink() / 4096
-        logging.debug('New size ' + str(c))
+        logging.debug('shrinksystem::New size {0}, 0x{0:x}'.format(c))
         resizesystem(c)
         logging.debug('shrinksystem complete')
     except Exception as e:
@@ -152,7 +154,8 @@ def growsystem():
     
     try:
         c=rominfo.rominfo.systemsizeGrow() / 4096
-        logging.debug('New size ' + str(c))
+        logging.debug('shrinksystem::New size {0}, 0x{0:x}'.format(c))
+        ##logging.debug('New size ' + str(c))
         resizesystem(c)
         logging.debug('growsystem complete')
     except Exception as e:
