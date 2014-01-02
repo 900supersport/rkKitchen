@@ -74,6 +74,7 @@ class rominfo:
     system = ''
     user = ''
     factory = ''
+    metadata = ''
     originalsystemsize = 0
     parameterfile = ''
     mtdblocks = []
@@ -133,6 +134,7 @@ class rominfo:
                 rominfo.system = reader.system
                 rominfo.user = reader.user
                 rominfo.factory = reader.factory
+                rominfo.metadata = reader.metadata
                 rominfo.parameterfile = reader.parameterfile
                 rominfo.originalsystemsize = reader.originalsystemsize
                 rominfo.mtdblocks = reader.mtdblocks
@@ -168,6 +170,7 @@ class rominfo:
             self.system = rominfo.system
             self.user = rominfo.user
             self.factory = rominfo.factory
+            self.metadata = rominfo.metadata
             self.parameterfile = rominfo.parameterfile
             self.originalsystemsize = rominfo.originalsystemsize
             self.mtdblocks = rominfo.mtdblocks
@@ -229,24 +232,29 @@ class rominfo:
     def parsemtdblocks(CMDLINE,parsemtdonly = 0):
         '''parse image data
     '''
-        rominfo.mtdblocks = []
-        cmdlinedata = CMDLINE.split(':')
-        for i,v in enumerate(cmdlinedata):
-            if v.find('(cache)') > 0 :
-                idat = v
-                break
-        
-        ##parse image data
-        for i,v in enumerate(idat.split(',')):
-            tpos = v.find('@')
-            bpos = v.find('(')
-            size = v[:tpos]
-            offset = v[tpos+1:bpos]
-            image = v[bpos+1:].strip(')')
-            if parsemtdonly != 1:
-                rominfo.setimage(image,offset,size)
-            rominfo.mtdblocks.append(image)
-    
+        logging.debug('rominfo::parsemtdblocks CMDLINE = ' + CMDLINE)
+        try:
+            rominfo.mtdblocks = []
+            cmdlinedata = CMDLINE.split(':')
+            for i,v in enumerate(cmdlinedata):
+                if v.find('(cache)') > 0 :
+                    idat = v
+                    break
+            
+            ##parse image data
+            for i,v in enumerate(idat.split(',')):
+                tpos = v.find('@')
+                bpos = v.find('(')
+                size = v[:tpos]
+                offset = v[tpos+1:bpos]
+                image = v[bpos+1:].strip(')')
+                logging.debug('rominfo::parsemtdblocks image = ' + image)
+                if parsemtdonly != 1:
+                    rominfo.setimage(image,offset,size)
+                rominfo.mtdblocks.append(image)
+                logging.debug('rominfo::parsemtdblocks image appended')
+        except Exception as e:
+            logerror('rominfo::parsemtdblocks ' ,e ,1)
 
     @staticmethod
     def applyparameterchanges():
@@ -327,24 +335,33 @@ class rominfo:
                 growth = udsb - currentsize
                 #print growth
                 f = rominfo.parameterfile
+                logging.info('rominfo::writeparameterfile rominfo.parameterfile ' + f)
                 if growth == 0:
                     npf = f
                 else:
                     chendloc = f.find(',', f.find('(cache)'))+1
                     udendloc = f.find(',', f.find('(userdata)'))+1
+                    mdendloc = f.find(',', f.find('(metadata)'))+1
+                    #logging.info('rominfo::writeparameterfile mdendloc ={}'.format(mdendloc))
                     kpendloc = f.find(',', f.find('(kpanic)'))+1
                     sysendloc = f.find(',', f.find('(system)'))+1
                     userendloc =  f.find('(user)')+6
 
                     uds = f[chendloc:udendloc]
-                    kps = f[udendloc:kpendloc]
+                    if mdendloc >0:
+                        mds = f[udendloc:mdendloc]
+                        kps = f[mdendloc:kpendloc]
+                    else:
+                        kps = f[udendloc:kpendloc]
                     syss = f[kpendloc:sysendloc]
                     us = f[sysendloc:userendloc]
                     rest = f[userendloc:]
 
                     nudsh = hex(udsb/512)[:-1]
                     uds = rominfo.submtdsize(uds,nudsh)
-
+                    if mdendloc >0:
+                        nmdo = rominfo.newoffset(rominfo.metadata.offset,growth)
+                        mds = rominfo.submtdoffset(mds,nmdo)
                     nkpo = rominfo.newoffset(rominfo.kpanic.offset,growth) 
                     nsyso = rominfo.newoffset(rominfo.system.offset,growth)
                     nuo = rominfo.newoffset(rominfo.user.offset,growth)
@@ -355,6 +372,8 @@ class rominfo:
 
                     npf = f[:chendloc]
                     npf = npf + uds
+                    if mdendloc >0:
+                        npf = npf + mds
                     npf = npf + kps
                     npf = npf + syss
                     npf = npf + us
@@ -374,6 +393,7 @@ class rominfo:
         '''substitues size in the mtdstring supplied
     '''
         #strip 0x
+        logging.debug('submtdsize mtdstring = ' + mtdstring)
         size = size[2:].upper()
         mtdsize,mtdoffset = mtdstring.split('@')
         #force the size component to correct length
@@ -384,6 +404,7 @@ class rominfo:
     def submtdoffset(mtdstring,offset):
         '''substitues size in the mtdstring supplied
     '''
+        logging.debug('submtdoffset mtdstring = ' + mtdstring)
         offset = offset[2:].upper()
         mtdsize,mtdoffset = mtdstring.split('@')
         loc = mtdoffset.find('(')
@@ -492,6 +513,8 @@ class rominfo:
             rominfo.user = imageflashinfo(image,offset,size)
         elif image == 'factory':
             rominfo.factory = imageflashinfo(image,offset,size)
+        elif image == 'metadata':
+            rominfo.metadata = imageflashinfo(image,offset,size)
 
  
     @staticmethod
@@ -561,6 +584,7 @@ class rominfo:
             rollingoffset = 0
             invalid = 0
             errors = ''
+            #logging.info(mtdblocks)
 
             for i,v in enumerate(mtdblocks):
                 offset = 0
@@ -613,7 +637,9 @@ class rominfo:
         if image == 'user':
             worker = ri.user
         if image == 'factory':
-            worker = ri.factory        
+            worker = ri.factory
+        if image == 'metadata':
+            worker = ri.metadata 
         return worker.size, worker.offset, worker.imagesize()    
 
     
