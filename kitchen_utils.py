@@ -94,7 +94,7 @@ def query_add_by_file(filepath,deployfilename):
                     addition ="'" + cl[p+1:] + "'"
         
                     #call out to some python as root :-)
-                    os.system('sudo python ' + kRar + ' query_add ' + filepath + ' ' + check + ' ' + addition)
+                    os.system('sudo python ' + kRar + ' query_add ' + filepath + ' "' + check + '" "' + addition + '"')
     except Exception as e:
         logerror('kitchen_utils::query_add_by_File ',e,1)
 

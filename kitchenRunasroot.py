@@ -46,12 +46,19 @@ def query_add(filepath, check, addition):
         #print filepath
         #print check
         #print addition
+        check = check.strip("'")
+        check = check.strip('"')
+        check = check.strip(' ')
+        addition = addition.strip("'")
+        addition = addition.strip('"')
+        addition = addition.strip(' ')
+        
         with open(filepath,'r+') as f:
             initrf = f.read()
             found = initrf.find(check)
-            #print('check: ' + check)
-            #print('found: ' + found)
-            #print('addition: ' + addition)
+            print('query_add::check: ' + check)
+            #print('query_add::found: {}'.format(  found))
+            print('query_add::addition: ' + addition)
             if found == -1:
                 f.write('\n')
                 f.write(addition.strip())
