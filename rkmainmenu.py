@@ -309,6 +309,11 @@ def copyImages():
         shutil.copy(
             os.path.join(KitchenConfig.KitchenConfig.SourceROMUnpackedLoc(),'parameter')
             ,'working')
+        
+            
+        for file in glob.glob(os.path.join(KitchenConfig.KitchenConfig.SourceROMUnpackedLoc(),'*.bin')):
+            print file
+            shutil.copy(file,'working')
 
         rominfo.rominfo.originalsystemsize = os.stat('working/system.img').st_size
         

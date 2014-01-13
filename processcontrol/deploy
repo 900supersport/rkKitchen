@@ -29,3 +29,12 @@ G, preinstall.sh, bin/, 0o755
 L, bootanimation.zip, media/, 0o755
 L, recovery.img, preinstall/,0o555
 
+#add support for modules via init.d
+L, auth_rpcgss.ko, lib/modules/,0o644
+L, cifs.ko, lib/modules/,0o644
+L, lockd.ko, lib/modules/,0o644
+L, md4.ko, lib/modules/,0o644
+L, nfs.ko, lib/modules/,0o644
+L, sunrpc.ko, lib/modules/,0o644
+L, tun.ko, lib/modules/,0o644
+L, 100_loadmodules, etc/init.d/,0o744
