@@ -174,7 +174,7 @@ def mvcpfilesworker(movefilename,sourceroot,op,asroot,verbose=0):
                                 zf = zipfile.ZipFile(file=dest,mode='a',compression=zipfile.ZIP_DEFLATED)
                                 
                                 for file in glob.glob(source):
-                                    #now set fn based on the glob'd filename and the destination
+                                    #now set fn based on the glob'd filename and the destination 
                                     pth,fn =os.path.split(file)
                                     fn= os.path.join(destpath,fn)
                                     
