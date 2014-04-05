@@ -25,7 +25,7 @@
 ############################################################################
 #
 # 13/1/14 extend mvcpfilesworker for wildcards
-#
+# 5/4/14 correct mvcpfilesworker for wildcards
 ############################################################################
 import os
 import logging
@@ -179,6 +179,8 @@ def mvcpfilesworker(movefilename,sourceroot,op,asroot,verbose=0):
                                     fn= os.path.join(destpath,fn)
                                     
                                     logging.debug('kitchen_utils::mvcpfilesworker Zipping {} size {:,} kb'.format(file,os.stat(file).st_size/1024))
+                                #zf.printdir()
+                                for file in glob.glob(source):
                                     if verbose ==1:
                                         pprint( 'Zipping {} size {:,} kb'.format(file,os.stat(file).st_size/1024))
                                     zf.write(file,fn)
