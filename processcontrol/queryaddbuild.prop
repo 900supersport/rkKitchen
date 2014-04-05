@@ -11,3 +11,16 @@
 #test
 #Feck, #Feck = Father Jack says, that would be an ecumenical matter
 
+RileyROM, #RileyROM build.prop additions
+Enable Multi-User Support, #Enable Multi-User Support
+fw.max_users, fw.max_users=4
+Minimal, #Minimal, if any, enhancement of video streaming
+net.tcp.buffersize.default, net.tcp.buffersize.default=4096,87380,256960,4096, 16384,256960
+net.tcp.buttersize.wifi, net.tcp.buttersize.wifi=4096,87380,256960,4096,163 84,256960
+media.stagefright.enable-player, media.stagefright.enable-player=true 
+media.stagefright.enable-meta, media.stagefright.enable-meta=true 
+media.stagefright.enable-scan, media.stagefright.enable-scan=true 
+media.stagefright.enable-http, media.stagefright.enable-http=true 
+Enables external GPS on devices without internal GPS, #Enables external GPS on devices without internal GPS
+gps.enable, gps.enable=true
+ro.com.google.locationfeatures, ro.com.google.locationfeatures=1

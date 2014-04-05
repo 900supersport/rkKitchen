@@ -23,6 +23,10 @@
 #   along with FreakTabKitchen.  If not, see <http://www.gnu.org/licenses/>.
 #
 ############################################################################
+#
+# 13/1/14 extend mvcpfilesworker for wildcards
+#
+############################################################################
 import os
 import logging
 import shutil
@@ -162,15 +166,22 @@ def mvcpfilesworker(movefilename,sourceroot,op,asroot,verbose=0):
                             iszip = 1
                     logging.debug('kitchen_utils::mvcpfilesworker iszip' + str(iszip))
                     try:
-                        if os.path.exists(source):
-                            
+                        #if os.path.exists(source):
+                        if len(glob.glob(source)) > 0:    
                             if iszip == 1:
-                                if verbose ==1:
-                                    pprint( 'Zipping {} size {:,} kb'.format(source,os.stat(source).st_size/1024))
                                 logging.debug('kitchen_utils::mvcpfilesworker ' + dest)
+                                
                                 zf = zipfile.ZipFile(file=dest,mode='a',compression=zipfile.ZIP_DEFLATED)
-                                #zf.printdir()
-                                zf.write(source,fn)
+                                
+                                for file in glob.glob(source):
+                                    #now set fn based on the glob'd filename and the destination
+                                    pth,fn =os.path.split(file)
+                                    fn= os.path.join(destpath,fn)
+                                    
+                                    logging.debug('kitchen_utils::mvcpfilesworker Zipping {} size {:,} kb'.format(file,os.stat(file).st_size/1024))
+                                    if verbose ==1:
+                                        pprint( 'Zipping {} size {:,} kb'.format(file,os.stat(file).st_size/1024))
+                                    zf.write(file,fn)
                                 zf.close()
                             else:
                                 if verbose ==1:

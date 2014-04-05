@@ -14,6 +14,7 @@ working/parameter2,ROMKits/ROMKit.zip,ROM/
 working/parameter4,ROMKits/ROMKit.zip,ROM/
 working/parameter6,ROMKits/ROMKit.zip,ROM/
 working/parameter8,ROMKits/ROMKit.zip,ROM/
+working/*.bin,ROMKits/ROMKit.zip,ROM/
 
 working/kernel.img,ROMKits/CWMROMKit.zip
 working/boot.img,ROMKits/CWMROMKit.zip
