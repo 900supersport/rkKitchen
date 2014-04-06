@@ -31,7 +31,7 @@ import rominfo
 import KitchenConfig
 
 from kitchenUI import mymenu
-from kitchen_utils import unpackboot_recovery, query_add, deployfiles, finalise_boot_recovery, custom_remove, custom_deploy
+from kitchen_utils import unpackboot_recovery, query_add, deployfiles, finalise_boot_recovery, custom_remove, custom_deploy, query_add_by_file
 from utils import apply_sed, logerror
 
 #    try:
@@ -53,6 +53,7 @@ def bootmenu():
             ('h6', 'Custom remove'),
             ('j7', 'Custom deploy'),
             ('k8', 'Custom extend'),
+            ('l9', 'Custom extend init.rk30board.rc'),
             ('p=', '='), 
             ('qw', 'broWse'),
             ('t=', '='), 
@@ -79,7 +80,13 @@ def bootmenu():
             path = 'working/boot/init.rc'
             query_add_by_file(path,os.path.join(KitchenConfig.KitchenConfig.KitchenPath
                 ,'processcontrol/queryaddinitrc'))     
-            os.system('sudo ' + rominfo.rominfo.editor() + ' ' + path)
+            os.system('sudo ' + KitchenConfig.KitchenConfig.editor + ' ' + path)
+        elif choice in ('9'):
+            path = 'working/boot/init.rk30board.rc'
+            query_add_by_file(path,os.path.join(KitchenConfig.KitchenConfig.KitchenPath
+                ,'processcontrol/queryaddrk30board'))  
+            logging.debug('boot::bootmenu sudo ' + KitchenConfig.KitchenConfig.editor + ' ' + path)
+            os.system('sudo ' + KitchenConfig.KitchenConfig.editor + ' ' + path)
         elif choice in ('W','w'):
             browse_boot()
         else:

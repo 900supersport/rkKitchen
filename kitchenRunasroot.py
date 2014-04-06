@@ -61,7 +61,7 @@ def query_add(filepath, check, addition):
             print('query_add::addition: ' + addition)
             if found == -1:
                 f.write('\n')
-                f.write(addition.strip())
+                f.write(addition.replace(r'\t','\t').replace(r'\n','\n'))
     except Exception as e:
         logerror('KitchenRunasroot::query_add ',e,1)
 
